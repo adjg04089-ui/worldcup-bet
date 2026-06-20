@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚽ 월드컵 내기 트래커</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:#f2f2ef;color:#1a1a1a;min-height:100vh}
+.container{max-width:480px;margin:0 auto;padding:1.25rem}
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
+.header-left h1{font-size:18px;font-weight:700;letter-spacing:-0.3px}
+.header-left .sub{font-size:11px;color:#999;margin-top:1px}
+.tabs{display:flex;background:#fff;border-radius:14px;padding:4px;gap:3px;margin-bottom:1.25rem;box-shadow:0 1px 6px rgba(0,0,0,0.06)}
+.tab{flex:1;padding:8px 4px;font-size:12px;cursor:pointer;border:none;background:transparent;color:#999;border-radius:10px;font-weight:500;transition:all 0.15s;font-family:inherit}
+.tab.active{background:#1a1a1a;color:#fff}
+.page{display:none}.page.active{display:block}
+.green{color:#059669}.red{color:#dc2626}
+.prize-hero{background:#1a1a1a;border-radius:18px;padding:1.75rem 1.5rem;text-align:center;margin-bottom:1rem;position:relative;overflow:hidden}
+.prize-hero::before{content:'⚽';position:absolute;font-size:120px;opacity:0.04;right:-20px;top:-20px;line-height:1}
+.prize-label{font-size:11px;color:#888;margin-bottom:8px;letter-spacing:0.5px;text-transform:uppercase}
+.prize-amount{font-size:46px;font-weight:700;color:#fff;margin-bottom:4px;letter-spacing:-2px;line-height:1}
+.prize-base{font-size:11px;color:#666;margin-bottom:14px}
+.prize-badge{display:inline-block;padding:5px 14px;border-radius:20px;font-size:12px;font-weight:700}
+.bar-wrap{background:#333;border-radius:6px;height:5px;margin-top:16px;overflow:hidden}
+.bar{height:5px;border-radius:6px;transition:width 0.6s,background 0.3s}
+.bar-labels{display:flex;justify-content:space-between;font-size:10px;color:#555;margin-top:5px}
+.danger{background:#3f1111;border:1px solid #7f2020;border-radius:10px;padding:9px 14px;font-size:12px;color:#f87171;margin-top:12px;display:none}
+.card{background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,0.05)}
+.card-title{font-size:12px;font-weight:700;margin-bottom:10px;color:#1a1a1a;letter-spacing:0.2px;text-transform:uppercase}
+.update-wrap{display:flex;gap:8px;align-items:center}
+.update-wrap input{flex:1;font-size:20px;font-weight:700;padding:10px 14px;border:1.5px solid #e8e8e4;border-radius:10px;background:#fafaf8;text-align:right;outline:none;color:#1a1a1a;font-family:inherit}
+.update-wrap input:focus{border-color:#1a1a1a}
+.btn-apply{padding:10px 16px;background:#1a1a1a;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit}
+.btn-apply:active{opacity:0.8}
+.input-hint{font-size:11px;color:#bbb;margin-top:6px}
+.hist-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f2f2ef;font-size:13px}
+.hist-row:last-child{border-bottom:none}
+.hist-date{color:#bbb;font-size:11px}
+.hist-amount{font-weight:700}
+.hist-diff{font-size:11px;font-weight:700}
+.slabel{font-size:10px;font-weight:700;color:#bbb;margin:14px 0 7px;letter-spacing:1px;text-transform:uppercase}
+.today-banner{background:#fffbeb;border:1.5px solid #fcd34d;border-radius:12px;padding:10px 14px;font-size:12px;color:#92400e;margin-bottom:12px;display:flex;align-items:center;gap:7px;font-weight:500}
+.ctabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px}
+.ctab{padding:5px 12px;font-size:12px;cursor:pointer;border:1.5px solid #e8e8e4;border-radius:20px;background:#fff;color:#999;font-weight:500;font-family:inherit}
+.ctab.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+.match-card{background:#fff;border-radius:14px;padding:12px 14px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,0.05)}
+.match-card.today-match{border:2px solid #f59e0b}
+.match-card.live-match{border:2px solid #dc2626;animation:pulse-border 2s infinite}
+@keyframes pulse-border{0%,100%{border-color:#dc2626}50%{border-color:#f87171}}
+.match-meta{display:flex;justify-content:space-between;font-size:10px;color:#bbb;margin-bottom:8px;align-items:center}
+.live-dot{display:inline-flex;align-items:center;gap:4px;color:#dc2626;font-weight:700}
+.live-dot::before{content:'';width:6px;height:6px;background:#dc2626;border-radius:50%;display:inline-block;animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.match-teams{display:flex;align-items:center;gap:8px}
+.team-s{display:flex;align-items:center;gap:6px;flex:1}
+.team-s.r{justify-content:flex-end;flex-direction:row-reverse}
+.tflag{font-size:22px}
+.tname{font-size:13px;font-weight:500;color:#444}
+.tname.our{color:#059669;font-weight:700}
+.score-b{min-width:48px;text-align:center;padding:5px 8px;border-radius:8px;font-size:15px;font-weight:700;background:#f2f2ef;color:#999}
+.score-b.done{background:#ecfdf5;color:#059669}
+.score-b.live-score{background:#fef2f2;color:#dc2626}
+.score-b.today-s{background:#fffbeb;color:#92400e;font-size:11px}
+.score-b.up{font-size:11px;color:#bbb}
+.refresh-wrap{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.refresh-btn{display:flex;align-items:center;gap:5px;padding:6px 12px;background:#fff;border:1.5px solid #e8e8e4;border-radius:20px;font-size:12px;font-weight:600;color:#1a1a1a;cursor:pointer;font-family:inherit}
+.refresh-btn:hover{background:#f2f2ef}
+.refresh-btn.loading{opacity:0.6;pointer-events:none}
+.refresh-icon{transition:transform 0.5s;display:inline-block}
+.refresh-btn.loading .refresh-icon{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ai-status{font-size:11px;color:#bbb;padding:4px 0 8px;min-height:20px}
+.ai-status.error{color:#dc2626}
+.ai-status.ok{color:#059669}
+.sync-status{font-size:11px;color:#bbb;margin-top:4px;min-height:16px}
+.sync-status.ok{color:#059669}
+.sync-status.error{color:#dc2626}
+.winner-btns{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.wbtn{padding:7px 13px;font-size:12px;cursor:pointer;border:1.5px solid #e8e8e4;border-radius:10px;background:#fff;color:#555;font-weight:600;font-family:inherit}
+.wbtn.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+.player-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #f2f2ef}
+.player-row:last-child{border-bottom:none}
+.avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+.p-name{font-size:13px;font-weight:700}
+.p-country{font-size:11px;color:#bbb}
+.badge{font-size:10px;padding:2px 7px;border-radius:6px;margin-left:4px;font-weight:700}
+.badge-allin{background:#fef3c7;color:#92400e}
+.badge-win{background:#d1fae5;color:#065f46}
+.p-prize{margin-left:auto;text-align:right}
+.p-amount{font-size:14px;font-weight:700}
+.p-share{font-size:10px;color:#bbb}
+.rules-box{background:#fafaf8;border-radius:12px;padding:14px;font-size:12px;color:#999;line-height:2;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="header-left">
+      <h1>⚽ 월드컵 내기</h1>
+      <div class="sub" id="today-label"></div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="goTab('home',this)">오늘의 상금</button>
+    <button class="tab" onclick="goTab('schedule',this)">경기 일정</button>
+    <button class="tab" onclick="goTab('prize',this)">상금 분배</button>
+  </div>
+
+  <!-- HOME -->
+  <div class="page active" id="page-home">
+    <div id="today-match-banner"></div>
+    <div class="prize-hero">
+      <div class="prize-label">현재 총 상금</div>
+      <div class="prize-amount" id="hero-amount">₩100,000</div>
+      <div class="prize-base">원금 ₩100,000 · 하원 🔥 전 재산 투자 중</div>
+      <div class="prize-badge" id="hero-badge">±0원 (0.0%)</div>
+      <div class="bar-wrap"><div class="bar" id="hero-bar" style="width:100%;background:#059669"></div></div>
+      <div class="bar-labels"><span style="color:#555">₩0</span><span id="bar-cur" style="color:#888">₩100,000</span><span style="color:#555">원금</span></div>
+      <div class="danger" id="danger">⚠️ 원금 이하! 투자 종료 → 남은 돈으로 단체 회식</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">오늘 상금 업데이트</div>
+      <div class="update-wrap">
+        <input type="number" id="new-amount" placeholder="현재 금액" step="100" min="0" inputmode="numeric">
+        <button class="btn-apply" onclick="applyAmount()">반영</button>
+      </div>
+      <div class="sync-status" id="sync-status"></div>
+      <div class="input-hint">하원이가 운용 중인 현재 총 금액을 입력하세요</div>
+    </div>
+
+    <div class="slabel">업데이트 기록</div>
+    <div class="card" id="history-list">
+      <div style="font-size:13px;color:#bbb">로딩 중...</div>
+    </div>
+  </div>
+
+  <!-- SCHEDULE -->
+  <div class="page" id="page-schedule">
+    <div class="refresh-wrap">
+      <div class="ctabs" style="margin-bottom:0">
+        <button class="ctab active" onclick="filterSch('all',this)">전체</button>
+        <button class="ctab" onclick="filterSch('스페인',this)">🇪🇸</button>
+        <button class="ctab" onclick="filterSch('아르헨티나',this)">🇦🇷</button>
+        <button class="ctab" onclick="filterSch('프랑스',this)">🇫🇷</button>
+        <button class="ctab" onclick="filterSch('잉글랜드',this)">🏴󠁧󠁢󠁥󠁮󠁧󠁿</button>
+      </div>
+      <button class="refresh-btn" id="refresh-btn" onclick="refreshScores()">
+        <span class="refresh-icon">↻</span> 실시간
+      </button>
+    </div>
+    <div class="ai-status" id="ai-status"></div>
+    <div id="sch-list"></div>
+  </div>
+
+  <!-- PRIZE -->
+  <div class="page" id="page-prize">
+    <div class="card">
+      <div class="card-title">우승국 시뮬레이션</div>
+      <div class="winner-btns">
+        <button class="wbtn" onclick="simWinner('스페인',this)">🇪🇸 스페인</button>
+        <button class="wbtn" onclick="simWinner('아르헨티나',this)">🇦🇷 아르헨티나</button>
+        <button class="wbtn" onclick="simWinner('프랑스',this)">🇫🇷 프랑스</button>
+        <button class="wbtn" onclick="simWinner('잉글랜드',this)">🏴󠁧󠁢󠁥󠁮󠁧󠁿 잉글랜드</button>
+        <button class="wbtn" onclick="simWinner('기타',this)">🌍 아무도 못 맞춤</button>
+      </div>
+    </div>
+    <div id="prize-result"></div>
+    <div class="rules-box">
+      📌 내기 규칙<br>
+      · 5명 × 2만원 = 총 10만원, 하원이 전부 투자 중 🔥<br>
+      · 원금(₩100,000) 이하 → 투자 종료, 남은 금액으로 단체 회식<br>
+      · 여러 명이 맞추면 → 최종 금액 균등 분배<br>
+      · 아무도 못 맞추면 → 단체 회식
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Supabase 설정 ──────────────────────────
+const SUPABASE_URL = 'https://ublqefkqgeghwgrrakeh.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVibHFlZmtxZ2VnaHdncnJha2VoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5MjYyODQsImV4cCI6MjA5NzUwMjI4NH0.CB7XHnaPASzTwoA2WP9tn72H72Jen2z9lH-dzrph6Y4';
+
+const SB_HEADERS = {
+  'Content-Type': 'application/json',
+  'apikey': SUPABASE_KEY,
+  'Authorization': 'Bearer ' + SUPABASE_KEY
+};
+
+async function sbGet() {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/prize_amount?order=id.desc&limit=20`, {
+      headers: {...SB_HEADERS, 'Prefer': 'return=representation'}
+    });
+    return await res.json();
+  } catch(e) { return null; }
+}
+
+async function sbInsert(amount) {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/prize_amount`, {
+      method: 'POST',
+      headers: {...SB_HEADERS, 'Prefer': 'return=representation'},
+      body: JSON.stringify({ amount })
+    });
+    return res.ok;
+  } catch(e) { return false; }
+}
+
+// ── 상수 ──────────────────────────────────
+const BASE = 100000;
+const PLAYERS = [
+  {name:'미나',  country:'스페인',    flag:'🇪🇸', init:'미', bg:'#dbeafe', tc:'#1e40af'},
+  {name:'은지',  country:'아르헨티나', flag:'🇦🇷', init:'은', bg:'#fee2d5', tc:'#9a3412'},
+  {name:'구현',  country:'프랑스',    flag:'🇫🇷', init:'구', bg:'#fce7f3', tc:'#9d174d'},
+  {name:'하원',  country:'프랑스',    flag:'🇫🇷', init:'하', bg:'#fce7f3', tc:'#9d174d', allIn:true},
+  {name:'승준',  country:'잉글랜드',  flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', init:'승', bg:'#dcfce7', tc:'#166534'},
+];
+const OUR = ['스페인','아르헨티나','프랑스','잉글랜드'];
+const TODAY_STR = "6/21";
+
+let SCHED = [
+  {g:'그룹 H', hf:'🇪🇸', h:'스페인',     af:'🇨🇻', a:'카보베르데',     hs:0,    as:0,    done:true,  date:'6/15', venue:'애틀랜타'},
+  {g:'그룹 H', hf:'🇪🇸', h:'스페인',     af:'🇸🇦', a:'사우디아라비아',  hs:null, as:null, done:false, date:'6/21', venue:'애틀랜타'},
+  {g:'그룹 H', hf:'🇺🇾', h:'우루과이',   af:'🇪🇸', a:'스페인',        hs:null, as:null, done:false, date:'6/26', venue:'과달라하라'},
+  {g:'그룹 J', hf:'🇦🇷', h:'아르헨티나',  af:'🇩🇿', a:'알제리',        hs:3,    as:0,    done:true,  date:'6/16', venue:'캔자스시티'},
+  {g:'그룹 J', hf:'🇦🇷', h:'아르헨티나',  af:'🇦🇹', a:'오스트리아',     hs:null, as:null, done:false, date:'6/22', venue:'댈러스'},
+  {g:'그룹 J', hf:'🇯🇴', h:'요르단',     af:'🇦🇷', a:'아르헨티나',     hs:null, as:null, done:false, date:'6/27', venue:'댈러스'},
+  {g:'그룹 I', hf:'🇫🇷', h:'프랑스',     af:'🇸🇳', a:'세네갈',        hs:3,    as:1,    done:true,  date:'6/16', venue:'뉴욕'},
+  {g:'그룹 I', hf:'🇳🇴', h:'노르웨이',   af:'🇮🇶', a:'이라크',        hs:4,    as:1,    done:true,  date:'6/16', venue:'보스턴'},
+  {g:'그룹 I', hf:'🇫🇷', h:'프랑스',     af:'🇮🇶', a:'이라크',        hs:null, as:null, done:false, date:'6/22', venue:'필라델피아'},
+  {g:'그룹 I', hf:'🇳🇴', h:'노르웨이',   af:'🇸🇳', a:'세네갈',        hs:null, as:null, done:false, date:'6/22', venue:'뉴욕'},
+  {g:'그룹 I', hf:'🇳🇴', h:'노르웨이',   af:'🇫🇷', a:'프랑스',        hs:null, as:null, done:false, date:'6/26', venue:'보스턴'},
+  {g:'그룹 I', hf:'🇸🇳', h:'세네갈',    af:'🇮🇶', a:'이라크',        hs:null, as:null, done:false, date:'6/26', venue:'토론토'},
+  {g:'그룹 L', hf:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', h:'잉글랜드',   af:'🇭🇷', a:'크로아티아',     hs:4,    as:2,    done:true,  date:'6/17', venue:'댈러스'},
+  {g:'그룹 L', hf:'🇬🇭', h:'가나',       af:'🇵🇦', a:'파나마',        hs:1,    as:0,    done:true,  date:'6/18', venue:'댈러스'},
+  {g:'그룹 L', hf:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', h:'잉글랜드',   af:'🇬🇭', a:'가나',         hs:null, as:null, done:false, date:'6/23', venue:'보스턴'},
+  {g:'그룹 L', hf:'🇵🇦', h:'파나마',     af:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', a:'잉글랜드',    hs:null, as:null, done:false, date:'6/27', venue:'뉴욕'},
+];
+
+let currentFilter = 'all';
+let currentAmount = BASE;
+let historyData = [];
+
+function fmtW(v){return '₩'+Math.round(v).toLocaleString('ko-KR')}
+
+function goTab(t,el){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+t).classList.add('active');
+}
+
+function renderHero(){
+  const diff=currentAmount-BASE;
+  const pct=(diff/BASE*100).toFixed(1);
+  const isDown=currentAmount<BASE;
+  const barPct=Math.min(100,Math.max(2,(currentAmount/BASE)*100));
+  const barColor=isDown?'#dc2626':(currentAmount>BASE*1.15?'#059669':'#2563eb');
+  document.getElementById('hero-amount').textContent=fmtW(currentAmount);
+  const badge=document.getElementById('hero-badge');
+  badge.textContent=(diff>=0?'+':'')+fmtW(diff)+' ('+(pct>0?'+':'')+pct+'%)';
+  badge.style.background=isDown?'rgba(220,38,38,0.2)':'rgba(5,150,105,0.2)';
+  badge.style.color=isDown?'#f87171':'#34d399';
+  document.getElementById('hero-bar').style.width=barPct+'%';
+  document.getElementById('hero-bar').style.background=barColor;
+  document.getElementById('bar-cur').textContent=fmtW(currentAmount);
+  document.getElementById('danger').style.display=isDown?'block':'none';
+}
+
+function renderTodayBanner(){
+  const todayMatches=SCHED.filter(m=>m.date===TODAY_STR&&!m.done&&(OUR.includes(m.h)||OUR.includes(m.a)));
+  const banner=document.getElementById('today-match-banner');
+  if(!todayMatches.length){banner.innerHTML='';return;}
+  const text=todayMatches.map(m=>`${m.hf}${m.h} vs ${m.a}${m.af}`).join(' · ');
+  banner.innerHTML=`<div class="today-banner">🔥 <strong>오늘 경기:</strong> ${text}</div>`;
+}
+
+function renderHistory(){
+  const el=document.getElementById('history-list');
+  if(!historyData.length){el.innerHTML='<div style="font-size:13px;color:#bbb">아직 기록이 없습니다.</div>';return;}
+  el.innerHTML=historyData.map((h,i)=>{
+    const prev = historyData[i+1]?.amount ?? BASE;
+    const diff=h.amount-prev;
+    const d=new Date(h.created_at);
+    const dateStr=`${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;
+    return `<div class="hist-row">
+      <span class="hist-date">${dateStr}</span>
+      <span class="hist-amount">${fmtW(h.amount)}</span>
+      <span class="hist-diff ${diff>=0?'green':'red'}">${diff>=0?'+':''}${fmtW(diff)}</span>
+    </div>`;
+  }).join('');
+}
+
+async function loadFromDB(){
+  const data = await sbGet();
+  if(data && data.length){
+    historyData = data;
+    currentAmount = data[0].amount;
+  }
+  renderHero();
+  renderHistory();
+}
+
+async function applyAmount(){
+  const v=parseInt(document.getElementById('new-amount').value.replace(/,/g,''));
+  if(isNaN(v)||v<0)return;
+  const status=document.getElementById('sync-status');
+  status.className='sync-status';
+  status.textContent='저장 중...';
+  const ok = await sbInsert(v);
+  if(ok){
+    document.getElementById('new-amount').value='';
+    status.className='sync-status ok';
+    status.textContent='✓ 모든 친구에게 반영됐어요!';
+    await loadFromDB();
+    setTimeout(()=>status.textContent='',3000);
+  } else {
+    status.className='sync-status error';
+    status.textContent='저장 실패. 다시 시도해주세요.';
+  }
+}
+
+function renderSchedule(filter){
+  currentFilter=filter;
+  const matches=filter==='all'?SCHED:SCHED.filter(m=>m.h===filter||m.a===filter);
+  const done=matches.filter(m=>m.done&&!m.live);
+  const live=matches.filter(m=>m.live);
+  const todayM=matches.filter(m=>!m.done&&!m.live&&m.date===TODAY_STR);
+  const upcoming=matches.filter(m=>!m.done&&!m.live&&m.date!==TODAY_STR);
+
+  function card(m){
+    const hO=OUR.includes(m.h),aO=OUR.includes(m.a);
+    const isT=m.date===TODAY_STR&&!m.done&&!m.live;
+    const isL=m.live;
+    return `<div class="match-card ${isT?'today-match':''} ${isL?'live-match':''}">
+      <div class="match-meta">
+        <span>${m.g}</span>
+        <span>${isL?'<span class="live-dot">LIVE</span>':m.date+' · '+m.venue}</span>
+      </div>
+      <div class="match-teams">
+        <div class="team-s"><span class="tflag">${m.hf}</span><span class="tname ${hO?'our':''}">${m.h}</span></div>
+        <div class="score-b ${m.done?'done':isL?'live-score':isT?'today-s':'up'}">${(m.done||isL)&&m.hs!==null?(m.hs+':'+m.as):isT?'오늘':'vs'}</div>
+        <div class="team-s r"><span class="tflag">${m.af}</span><span class="tname ${aO?'our':''}">${m.a}</span></div>
+      </div>
+    </div>`;
+  }
+
+  let html='';
+  if(live.length) html+=`<div class="slabel">🔴 진행 중</div>`+live.map(card).join('');
+  if(done.length) html+=`<div class="slabel">완료된 경기</div>`+done.map(card).join('');
+  if(todayM.length) html+=`<div class="slabel">🔥 오늘 경기</div>`+todayM.map(card).join('');
+  if(upcoming.length) html+=`<div class="slabel">예정된 경기</div>`+upcoming.map(card).join('');
+  document.getElementById('sch-list').innerHTML=html||'<div style="font-size:13px;color:#bbb;padding:1rem 0">경기 없음</div>';
+}
+
+function filterSch(f,el){
+  document.querySelectorAll('.ctab').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  renderSchedule(f);
+}
+
+async function refreshScores(){
+  const btn=document.getElementById('refresh-btn');
+  const status=document.getElementById('ai-status');
+  btn.classList.add('loading');
+  status.className='ai-status';
+  status.textContent='AI가 최신 경기 결과를 검색 중...';
+
+  const prompt=`지금 2026 FIFA 월드컵 경기 결과를 웹에서 찾아서 스페인, 아르헨티나, 프랑스, 잉글랜드의 최신 경기 결과를 알려줘.
+반드시 아래 JSON 형식으로만 응답해. 다른 텍스트 없이 JSON만:
+{"updated_at":"6/21 14:30","matches":[{"home":"홈팀(한국어)","away":"어웨이팀(한국어)","home_score":숫자또는null,"away_score":숫자또는null,"done":true또는false,"live":true또는false,"date":"6/21","group":"그룹 H"}]}
+done=true 경기종료, live=true 진행중, 둘다false 예정. 스페인/아르헨티나/프랑스/잉글랜드 포함 경기만.`;
+
+  try {
+    const res=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        model:"claude-sonnet-4-6",
+        max_tokens:1000,
+        tools:[{type:"web_search_20250305",name:"web_search"}],
+        messages:[{role:"user",content:prompt}]
+      })
+    });
+    const data=await res.json();
+    let jsonStr='';
+    for(const block of data.content){ if(block.type==='text') jsonStr+=block.text; }
+    const cleaned=jsonStr.replace(/```json|```/g,'').trim();
+    const s=cleaned.indexOf('{'), e=cleaned.lastIndexOf('}');
+    if(s===-1) throw new Error('no json');
+    const parsed=JSON.parse(cleaned.slice(s,e+1));
+    const FLAGS={'스페인':'🇪🇸','아르헨티나':'🇦🇷','프랑스':'🇫🇷','잉글랜드':'🏴󠁧󠁢󠁥󠁮󠁧󠁿','카보베르데':'🇨🇻','사우디아라비아':'🇸🇦','우루과이':'🇺🇾','알제리':'🇩🇿','오스트리아':'🇦🇹','요르단':'🇯🇴','세네갈':'🇸🇳','이라크':'🇮🇶','노르웨이':'🇳🇴','크로아티아':'🇭🇷','가나':'🇬🇭','파나마':'🇵🇦'};
+    for(const m of parsed.matches){
+      const ex=SCHED.find(s=>(s.h===m.home&&s.a===m.away)||(s.h===m.away&&s.a===m.home));
+      if(ex){
+        if(m.done){ex.done=true;ex.live=false;}
+        if(m.live){ex.live=true;ex.done=false;}
+        if(m.home_score!==null&&m.away_score!==null){
+          if(ex.h===m.home){ex.hs=m.home_score;ex.as=m.away_score;}
+          else{ex.hs=m.away_score;ex.as=m.home_score;}
+        }
+      }
+    }
+    status.className='ai-status ok';
+    status.textContent=`✓ ${parsed.updated_at||'방금'} 업데이트됨`;
+    renderSchedule(currentFilter);
+    renderTodayBanner();
+  } catch(e){
+    status.className='ai-status error';
+    status.textContent='업데이트 실패. 기존 데이터를 표시합니다.';
+  } finally {
+    btn.classList.remove('loading');
+  }
+}
+
+function simWinner(winner,el){
+  document.querySelectorAll('.wbtn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  const box=document.getElementById('prize-result');
+  if(winner==='기타'){
+    box.innerHTML=`<div class="card" style="text-align:center;padding:2rem 1rem">
+      <div style="font-size:40px;margin-bottom:8px">🍽️</div>
+      <div style="font-size:16px;font-weight:700;margin-bottom:4px">단체 회식!</div>
+      <div style="font-size:13px;color:#bbb">아무도 못 맞췄어요<br>남은 금액 ${fmtW(currentAmount)}으로 다 같이 냠냠~</div>
+    </div>`;
+    return;
+  }
+  const winners=PLAYERS.filter(p=>p.country===winner);
+  const losers=PLAYERS.filter(p=>p.country!==winner);
+  const share=Math.floor(currentAmount/winners.length);
+  box.innerHTML=`<div class="card" style="margin-bottom:10px">
+    <div class="card-title">${winner} 우승 시 🏆</div>
+    ${winners.map(w=>`<div class="player-row">
+      <div class="avatar" style="background:${w.bg};color:${w.tc}">${w.init}</div>
+      <div><div class="p-name">${w.name}${w.allIn?'<span class="badge badge-allin">🔥전재산</span>':''}<span class="badge badge-win">당첨</span></div><div class="p-country">${w.flag} ${w.country}</div></div>
+      <div class="p-prize"><div class="p-amount green">${fmtW(share)}</div><div class="p-share">${winners.length>1?'균등 분배':''}</div></div>
+    </div>`).join('')}
+    <div style="display:flex;justify-content:space-between;font-size:12px;color:#bbb;margin-top:10px;padding-top:10px;border-top:1px solid #f2f2ef">
+      <span>총 상금</span><span style="font-weight:700;color:#1a1a1a">${fmtW(currentAmount)}</span>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title" style="color:#bbb">나머지</div>
+    ${losers.map(p=>`<div class="player-row">
+      <div class="avatar" style="background:${p.bg};color:${p.tc}">${p.init}</div>
+      <div><div class="p-name">${p.name}</div><div class="p-country">${p.flag} ${p.country}</div></div>
+      <div class="p-prize"><div class="p-amount red">꽝 😭</div></div>
+    </div>`).join('')}
+  </div>`;
+}
+
+// init
+document.getElementById('today-label').textContent=new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'});
+loadFromDB();
+renderTodayBanner();
+renderSchedule('all');
+
+// 30초마다 자동 새로고침
+setInterval(loadFromDB, 30000);
+</script>
+</body>
+</html>
