@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>⚽ 월드컵 내기 트래кер</title>
+<title>⚽ 월드컵 내기 트래커</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght=400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:#f2f2ef;color:#1a1a1a;min-height:100vh}
 .container{max-width:480px;margin:0 auto;padding:1.25rem}
@@ -115,11 +115,11 @@ body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:#f2f2ef;colo
     <div class="prize-hero">
       <div class="prize-label">현재 총 상금</div>
       <div class="prize-amount" id="hero-amount">₩100,000</div>
-      <div class="prize-base">원금 ₩120,000 · 하원 🔥 투자 중</div>
+      <div class="prize-base">원금 ₩100,000 · 하원 🔥  투자 중</div>
       <div class="prize-badge" id="hero-badge">±0원 (0.0%)</div>
       <div class="bar-wrap"><div class="bar" id="hero-bar" style="width:100%;background:#059669"></div></div>
       <div class="bar-labels"><span style="color:#555">₩0</span><span id="bar-cur" style="color:#888">₩100,000</span><span style="color:#555">원금</span></div>
-      <div class="danger" id="danger">⚠️ 원금 이하! 투자 종료 → 남은 돈으로 단체 회식</div>
+      <div class="danger" id="danger">⚠️ 원금 이하! </div>
     </div>
 
     <div class="card">
@@ -146,8 +146,7 @@ body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:#f2f2ef;colo
         <button class="ctab" onclick="filterSch('스페인',this)">🇪🇸</button>
         <button class="ctab" onclick="filterSch('아르헨티나',this)">🇦🇷</button>
         <button class="ctab" onclick="filterSch('프랑스',this)">🇫🇷</button>
-        <button class="ctab" onclick="filterSch('잉글랜드',this)">🇬🇧</button>
-        <button class="ctab" onclick="filterSch('일본',this)">🇯🇵</button>
+        <button class="ctab" onclick="filterSch('잉글랜드',this)">🏴󠁧󠁢󠁥󠁮󠁧󠁿 잉글랜드</button>
       </div>
       <button class="refresh-btn" id="refresh-btn" onclick="refreshScores()">
         <span class="refresh-icon">↻</span> 실시간
@@ -165,16 +164,15 @@ body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:#f2f2ef;colo
         <button class="wbtn" onclick="simWinner('스페인',this)">🇪🇸 스페인</button>
         <button class="wbtn" onclick="simWinner('아르헨티나',this)">🇦🇷 아르헨티나</button>
         <button class="wbtn" onclick="simWinner('프랑스',this)">🇫🇷 프랑스</button>
-        <button class="wbtn" onclick="simWinner('잉글랜드',this)">🇬🇧 잉글랜드</button>
-        <button class="wbtn" onclick="simWinner('일본',this)">🇯🇵 일본</button>
+        <button class="wbtn" onclick="simWinner('잉글랜드',this)">🏴󠁧󠁢󠁥󠁮󠁧󠁿 잉글랜드</button>
         <button class="wbtn" onclick="simWinner('기타',this)">🌍 아무도 못 맞춤</button>
       </div>
     </div>
     <div id="prize-result"></div>
     <div class="rules-box">
       📌 내기 규칙<br>
-      · 6명 × 2만원 = 총 12만원, 하원이 전부 투자 중 🔥<br>
-      · 원금(₩120,000) 이하 → 투자 종료, 남은 금액으로 단체 회식<br>
+      · 5명 × 2만원 = 총 10만원, 하원이 전부 투자 중 🔥<br>
+      · 원금(₩100,000) 이하 → 투자 종료, 남은 금액으로 단체 회식<br>
       · 여러 명이 맞추면 → 최종 금액 균등 분배<br>
       · 아무도 못 맞추면 → 단체 회식
     </div>
@@ -184,7 +182,7 @@ body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:#f2f2ef;colo
 <script>
 // ── Supabase 설정 ──────────────────────────
 const SUPABASE_URL = 'https://ublqefkqgeghwgrrakeh.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVibHFlZmtxZ2VnaHdncnJha2VoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3IDE5MjYyODQsImV4cCI6MjA5NzUwMjI4NH0.CB7XHnaPASzTwoA2WP9tn72H72Jen2z9lH-dzrph6Y4';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVibHFlZmtxZ2VnaHdncnJha2VoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5MjYyODQsImV4cCI6MjA5NzUwMjI4NH0.CB7XHnaPASzTwoA2WP9tn72H72Jen2z9lH-dzrph6Y4';
 
 const SB_HEADERS = {
   'Content-Type': 'application/json',
@@ -213,35 +211,34 @@ async function sbInsert(amount) {
 }
 
 // ── 상수 ──────────────────────────────────
-const BASE = 120000;
+const BASE = 100000;
 const PLAYERS = [
   {name:'미나',  country:'스페인',    flag:'🇪🇸', init:'미', bg:'#dbeafe', tc:'#1e40af'},
   {name:'은지',  country:'아르헨티나', flag:'🇦🇷', init:'은', bg:'#fee2d5', tc:'#9a3412'},
   {name:'구현',  country:'프랑스',    flag:'🇫🇷', init:'구', bg:'#fce7f3', tc:'#9d174d'},
   {name:'하원',  country:'프랑스',    flag:'🇫🇷', init:'하', bg:'#fce7f3', tc:'#9d174d', allIn:true},
-  {name:'승준',  country:'잉글랜드',  flag:'🇬🇧', init:'승', bg:'#dcfce7', tc:'#166534'},
-  {name:'민경',  country:'일본',      flag:'🇯🇵', init:'민', bg:'#fff1f2', tc:'#9f1239'},
+  {name:'승준',  country:'잉글랜드',  flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', init:'승', bg:'#dcfce7', tc:'#166534'},
 ];
 const OUR = ['스페인','아르헨티나','프랑스','잉글랜드','일본'];
-const TODAY_STR = "6/24";
+const TODAY_STR = "6/21";
 
-// 2026 북중미 월드컵 각 팀의 실제 대진 일정 배치
 let SCHED = [
-  {g:'그룹 C', hf:'🇪🇸', h:'스페인',     af:'🇨🇲', a:'카메룬',        hs:null, as:null, done:false, date:'6/13', venue:'토론토'},
-  {g:'그룹 D', hf:'🇯🇵', h:'일본',       af:'🇳🇬', a:'나이지리아',     hs:null, as:null, done:false, date:'6/14', venue:'마이애미'},
-  {g:'그룹 E', hf:'🇦🇷', h:'아르헨티나',  af:'🇮🇷', a:'이란',          hs:null, as:null, done:false, date:'6/15', venue:'뉴욕'},
-  {g:'그룹 F', hf:'🇬🇧', h:'잉글랜드',   af:'🇪🇨', a:'에콰도르',       hs:null, as:null, done:false, date:'6/16', venue:'댈러스'},
-  {g:'그룹 H', hf:'🇫🇷', h:'프랑스',     af:'🇦🇺', a:'호주',          hs:null, as:null, done:false, date:'6/17', venue:'밴쿠버'},
-  {g:'그룹 C', hf:'🇪🇸', h:'스페인',     af:'🇺🇾', a:'우루과이',       hs:null, as:null, done:false, date:'6/18', venue:'보스턴'},
-  {g:'그룹 D', hf:'🇯🇵', h:'일본',       af:'🇦🇹', a:'오스트리아',     hs:null, as:null, done:false, date:'6/19', venue:'시애틀'},
-  {g:'그룹 E', hf:'🇦🇷', h:'아르헨티나',  af:'🇧🇪', a:'벨기에',        hs:null, as:null, done:false, date:'6/20', venue:'필라델피아'},
-  {g:'그룹 F', hf:'🇬🇧', h:'잉글랜드',   af:'🇨🇱', a:'칠레',          hs:null, as:null, done:false, date:'6/21', venue:'애틀랜타'},
-  {g:'그룹 H', hf:'🇫🇷', h:'프랑스',     af:'🇰🇷', a:'대한민국',       hs:null, as:null, done:false, date:'6/22', venue:'과달라하라'},
-  {g:'그룹 C', hf:'🇺🇦', h:'우크라이나',  af:'🇪🇸', a:'스페인',        hs:null, as:null, done:false, date:'6/24', venue:'마이애미'},
-  {g:'그룹 D', hf:'🇩🇿', h:'알제리',     af:'🇯🇵', a:'일본',          hs:null, as:null, done:false, date:'6/25', venue:'캔자스시티'},
-  {g:'그룹 E', hf:'🇨🇦', h:'캐나다',     af:'🇦🇷', a:'아르헨티나',     hs:null, as:null, done:false, date:'6/25', venue:'샌프란시스코'},
-  {g:'그룹 F', hf:'🇰🇷', h:'대한민국',   af:'🇬🇧', a:'잉글랜드',       hs:null, as:null, done:false, date:'6/26', venue:'휴스턴'},
-  {g:'그룹 H', hf:'🇨🇮', h:'코트디부아르',af:'🇫🇷', a:'프랑스',        hs:null, as:null, done:false, date:'6/27', venue:'애틀랜타'}
+  {g:'그룹 H', hf:'🇪🇸', h:'스페인',     af:'🇨🇻', a:'카보베르데',     hs:0,    as:0,    done:true,  date:'6/15', venue:'애틀랜타'},
+  {g:'그룹 H', hf:'🇪🇸', h:'스페인',     af:'🇸🇦', a:'사우디아라비아',  hs:null, as:null, done:false, date:'6/21', venue:'애틀랜타'},
+  {g:'그룹 H', hf:'🇺🇾', h:'우루과이',   af:'🇪🇸', a:'스페인',        hs:null, as:null, done:false, date:'6/26', venue:'과달라하라'},
+  {g:'그룹 J', hf:'🇦🇷', h:'아르헨티나',  af:'🇩🇿', a:'알제리',        hs:3,    as:0,    done:true,  date:'6/16', venue:'캔자스시티'},
+  {g:'그룹 J', hf:'🇦🇷', h:'아르헨티나',  af:'🇦🇹', a:'오스트리아',     hs:null, as:null, done:false, date:'6/22', venue:'댈러스'},
+  {g:'그룹 J', hf:'🇯🇴', h:'요르단',     af:'🇦🇷', a:'아르헨티나',     hs:null, as:null, done:false, date:'6/27', venue:'댈러스'},
+  {g:'그룹 I', hf:'🇫🇷', h:'프랑스',     af:'🇸🇳', a:'세네갈',        hs:3,    as:1,    done:true,  date:'6/16', venue:'뉴욕'},
+  {g:'그룹 I', hf:'🇳🇴', h:'노르웨이',   af:'🇮🇶', a:'이라크',        hs:4,    as:1,    done:true,  date:'6/16', venue:'보스턴'},
+  {g:'그룹 I', hf:'🇫🇷', h:'프랑스',     af:'🇮🇶', a:'이라크',        hs:null, as:null, done:false, date:'6/22', venue:'필라델피아'},
+  {g:'그룹 I', hf:'🇳🇴', h:'노르웨이',   af:'🇸🇳', a:'세네갈',        hs:null, as:null, done:false, date:'6/22', venue:'뉴욕'},
+  {g:'그룹 I', hf:'🇳🇴', h:'노르웨이',   af:'🇫🇷', a:'프랑스',        hs:null, as:null, done:false, date:'6/26', venue:'보스턴'},
+  {g:'그룹 I', hf:'🇸🇳', h:'세네갈',    af:'🇮🇶', a:'이라크',        hs:null, as:null, done:false, date:'6/26', venue:'토론토'},
+  {g:'그룹 L', hf:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', h:'잉글랜드',   af:'🇭🇷', a:'크로아티아',     hs:4,    as:2,    done:true,  date:'6/17', venue:'댈러스'},
+  {g:'그룹 L', hf:'🇬🇭', h:'가나',       af:'🇵🇦', a:'파나마',        hs:1,    as:0,    done:true,  date:'6/18', venue:'댈러스'},
+  {g:'그룹 L', hf:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', h:'잉글랜드',   af:'🇬🇭', a:'가나',         hs:null, as:null, done:false, date:'6/23', venue:'보스턴'},
+  {g:'그룹 L', hf:'🇵🇦', h:'파나마',     af:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', a:'잉글랜드',    hs:null, as:null, done:false, date:'6/27', venue:'뉴욕'},
 ];
 
 let currentFilter = 'all';
@@ -314,10 +311,6 @@ async function applyAmount(){
   const status=document.getElementById('sync-status');
   status.className='sync-status';
   status.textContent='저장 중...';
-  currentAmount = v;
-  historyData = [{amount:v, created_at:new Date().toISOString()}, ...historyData];
-  renderHero();
-  renderHistory();
   const ok = await sbInsert(v);
   if(ok){
     document.getElementById('new-amount').value='';
@@ -377,20 +370,18 @@ async function refreshScores(){
   status.className='ai-status';
   status.textContent='AI가 최신 경기 결과를 검색 중...';
 
-  const prompt=`현재 2026 FIFA 북중미 월드컵이 열리고 있습니다. 실시간 웹 검색 기능(web_search)을 활용하여 스페인, 아르헨티나, 프랑스, 잉글랜드, 일본이 참가하는 최신 경기 결과를 검색해 주세요.
-출력할 때는 백틱(\`\`\`)이나 추가 멘트를 넣지 말고 오직 아래 양식의 유효한 JSON 문자열 하나만 리턴해야 합니다:
-{"updated_at":"MM/DD HH:MM","matches":[{"home":"홈팀국가명","away":"어웨이팀국가명","home_score":숫자또는null,"away_score":숫자또는null,"done":true또는false,"live":true또는false,"date":"M/D","group":"그룹명"}]}`;
+  const prompt=`지금 2026 FIFA 월드컵 경기 결과를 웹에서 찾아서 스페인, 아르헨티나, 프랑스, 잉글랜드의 최신 경기 결과를 알려줘.
+반드시 아래 JSON 형식으로만 응답해. 다른 텍스트 없이 JSON만:
+{"updated_at":"6/21 14:30","matches":[{"home":"홈팀(한국어)","away":"어웨이팀(한국어)","home_score":숫자또는null,"away_score":숫자또는null,"done":true또는false,"live":true또는false,"date":"6/21","group":"그룹 H"}]}
+done=true 경기종료, live=true 진행중, 둘다false 예정. 스페인/아르헨티나/프랑스/잉글랜드 포함 경기만.`;
 
   try {
     const res=await fetch("https://api.anthropic.com/v1/messages",{
       method:"POST",
-      headers:{
-        "Content-Type":"application/json",
-        "x-api-key": "YOUR_ANTHROPIC_API_KEY"
-      },
+      headers:{"Content-Type":"application/json"},
       body:JSON.stringify({
-        model:"claude-3-5-sonnet-20241022",
-        max_tokens:1200,
+        model:"claude-sonnet-4-6",
+        max_tokens:1000,
         tools:[{type:"web_search_20250305",name:"web_search"}],
         messages:[{role:"user",content:prompt}]
       })
@@ -398,12 +389,11 @@ async function refreshScores(){
     const data=await res.json();
     let jsonStr='';
     for(const block of data.content){ if(block.type==='text') jsonStr+=block.text; }
-    const cleaned=jsonStr.replace(/```json|
-```/g,'').trim();
+    const cleaned=jsonStr.replace(/```json|```/g,'').trim();
     const s=cleaned.indexOf('{'), e=cleaned.lastIndexOf('}');
     if(s===-1) throw new Error('no json');
     const parsed=JSON.parse(cleaned.slice(s,e+1));
-    
+    const FLAGS={'스페인':'🇪🇸','아르헨티나':'🇦🇷','프랑스':'🇫🇷','잉글랜드':'🏴󠁧󠁢󠁥󠁮󠁧󠁿','카보베르데':'🇨🇻','사우디아라비아':'🇸🇦','우루과이':'🇺🇾','알제리':'🇩🇿','오스트리아':'🇦🇹','요르단':'🇯🇴','세네갈':'🇸🇳','이라크':'🇮🇶','노르웨이':'🇳🇴','크로아티아':'🇭🇷','가나':'🇬🇭','파나마':'🇵🇦'};
     for(const m of parsed.matches){
       const ex=SCHED.find(s=>(s.h===m.home&&s.a===m.away)||(s.h===m.away&&s.a===m.home));
       if(ex){
@@ -421,8 +411,7 @@ async function refreshScores(){
     renderTodayBanner();
   } catch(e){
     status.className='ai-status error';
-    status.textContent='업데이트 완료';
-    renderSchedule(currentFilter);
+    status.textContent='업데이트 실패. 기존 데이터를 표시합니다.';
   } finally {
     btn.classList.remove('loading');
   }
@@ -447,7 +436,7 @@ function simWinner(winner,el){
     <div class="card-title">${winner} 우승 시 🏆</div>
     ${winners.map(w=>`<div class="player-row">
       <div class="avatar" style="background:${w.bg};color:${w.tc}">${w.init}</div>
-      <div><div class="p-name">${w.name}<span class="badge badge-win">당첨</span></div><div class="p-country">${w.flag} ${w.country}</div></div>
+      <div><div class="p-name">${w.name}${w.allIn?'<span class="badge badge-allin">🔥전재산</span>':''}<span class="badge badge-win">당첨</span></div><div class="p-country">${w.flag} ${w.country}</div></div>
       <div class="p-prize"><div class="p-amount green">${fmtW(share)}</div><div class="p-share">${winners.length>1?'균등 분배':''}</div></div>
     </div>`).join('')}
     <div style="display:flex;justify-content:space-between;font-size:12px;color:#bbb;margin-top:10px;padding-top:10px;border-top:1px solid #f2f2ef">
@@ -470,6 +459,7 @@ loadFromDB();
 renderTodayBanner();
 renderSchedule('all');
 
+// 30초마다 자동 새로고침
 setInterval(loadFromDB, 30000);
 </script>
 </body>
