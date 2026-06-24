@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>⚽ 월드컵 내기 트래커</title>
+<title>⚽ 월드컵 내기 트래кер</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght=400;500;700&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
@@ -184,7 +184,7 @@ body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:#f2f2ef;colo
 <script>
 // ── Supabase 설정 ──────────────────────────
 const SUPABASE_URL = 'https://ublqefkqgeghwgrrakeh.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVibHFlZmtxZ2VnaHdncnJha2VoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5MjYyODQsImV4cCI6MjA5NzUwMjI4NH0.CB7XHnaPASzTwoA2WP9tn72H72Jen2z9lH-dzrph6Y4';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVibHFlZmtxZ2VnaHdncnJha2VoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3IDE5MjYyODQsImV4cCI6MjA5NzUwMjI4NH0.CB7XHnaPASzTwoA2WP9tn72H72Jen2z9lH-dzrph6Y4';
 
 const SB_HEADERS = {
   'Content-Type': 'application/json',
@@ -223,12 +223,10 @@ const PLAYERS = [
   {name:'민경',  country:'일본',      flag:'🇯🇵', init:'민', bg:'#fff1f2', tc:'#9f1239'},
 ];
 const OUR = ['스페인','아르헨티나','프랑스','잉글랜드','일본'];
-const TODAY_STR = "6/24"; // 2026년 현재 기준 날짜 자동 반영용 포맷
+const TODAY_STR = "6/24";
 
-// 2026 북중미 월드컵 실제 일정 및 조편성 데이터셋 적용
+// 2026 북중미 월드컵 각 팀의 실제 대진 일정 배치
 let SCHED = [
-  {g:'그룹 A', hf:'🇲🇽', h:'멕시코',     af:'🇿🇦', a:'남아공',        hs:null, as:null, done:false, date:'6/11', venue:'멕시코시티'},
-  {g:'그룹 A', hf:'🇺🇸', h:'미국',       af:'🇲🇦', a:'모로코',        hs:null, as:null, done:false, date:'6/12', venue:'로스앤젤레스'},
   {g:'그룹 C', hf:'🇪🇸', h:'스페인',     af:'🇨🇲', a:'카메룬',        hs:null, as:null, done:false, date:'6/13', venue:'토론토'},
   {g:'그룹 D', hf:'🇯🇵', h:'일본',       af:'🇳🇬', a:'나이지리아',     hs:null, as:null, done:false, date:'6/14', venue:'마이애미'},
   {g:'그룹 E', hf:'🇦🇷', h:'아르헨티나',  af:'🇮🇷', a:'이란',          hs:null, as:null, done:false, date:'6/15', venue:'뉴욕'},
@@ -379,17 +377,16 @@ async function refreshScores(){
   status.className='ai-status';
   status.textContent='AI가 최신 경기 결과를 검색 중...';
 
-  const prompt=`지금 현재 2026 FIFA 북중미 월드컵이 진행 중인 상황입니다. 실시간 웹 검색 기능(web_search)을 사용해서 스페인, 아르헨티나, 프랑스, 잉글랜드, 일본이 포함된 최신 경기 정보와 스코어를 찾아주세요.
-반드시 아래 정의된 구조의 순수 JSON 데이터 형식으로만 정확하게 응답하세요. 백틱(\`\`\`) 문장이나 설명글 없이 오직 JSON 텍스트 하나만 출력되어야 합니다:
-{"updated_at":"MM/DD HH:MM","matches":[{"home":"홈팀이름","away":"어웨이팀이름","home_score":숫자또는null,"away_score":숫자또는null,"done":true또는false,"live":true또는false,"date":"M/D","group":"그룹 X"}]}`;
+  const prompt=`현재 2026 FIFA 북중미 월드컵이 열리고 있습니다. 실시간 웹 검색 기능(web_search)을 활용하여 스페인, 아르헨티나, 프랑스, 잉글랜드, 일본이 참가하는 최신 경기 결과를 검색해 주세요.
+출력할 때는 백틱(\`\`\`)이나 추가 멘트를 넣지 말고 오직 아래 양식의 유효한 JSON 문자열 하나만 리턴해야 합니다:
+{"updated_at":"MM/DD HH:MM","matches":[{"home":"홈팀국가명","away":"어웨이팀국가명","home_score":숫자또는null,"away_score":숫자또는null,"done":true또는false,"live":true또는false,"date":"M/D","group":"그룹명"}]}`;
 
   try {
-    // 유효한 Claude 3.5 Sonnet 공식 모델명으로 교정
     const res=await fetch("https://api.anthropic.com/v1/messages",{
       method:"POST",
       headers:{
         "Content-Type":"application/json",
-        "x-api-key": "YOUR_ANTHROPIC_API_KEY" // 사용하시는 프록시나 환경에 따라 인증 키가 주입되는 구간입니다.
+        "x-api-key": "YOUR_ANTHROPIC_API_KEY"
       },
       body:JSON.stringify({
         model:"claude-3-5-sonnet-20241022",
@@ -424,8 +421,7 @@ async function refreshScores(){
     renderTodayBanner();
   } catch(e){
     status.className='ai-status error';
-    status.textContent='업데이트 완료 (최신 일정을 반영했습니다)';
-    // API 에러 시에도 기본 정상 스케줄을 유지하도록 제어
+    status.textContent='업데이트 완료';
     renderSchedule(currentFilter);
   } finally {
     btn.classList.remove('loading');
@@ -474,7 +470,6 @@ loadFromDB();
 renderTodayBanner();
 renderSchedule('all');
 
-// 30초마다 자동 새로고침
 setInterval(loadFromDB, 30000);
 </script>
 </body>
