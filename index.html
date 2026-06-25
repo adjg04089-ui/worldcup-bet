@@ -223,31 +223,33 @@ const PLAYERS = [
   {name:'민경',  country:'일본',      flag:'🇯🇵', init:'민', bg:'#fff1f2', tc:'#9f1239'},
 ];
 const OUR = ['스페인','아르헨티나','프랑스','잉글랜드','일본'];
-const TODAY_STR = "6/21";
+// 오늘 날짜 자동 계산 (6/25 형식)
+const _d = new Date();
+const TODAY_STR = `${_d.getMonth()+1}/${_d.getDate()}`;
 
 let SCHED = [
   {g:'그룹 H', hf:'🇪🇸', h:'스페인',     af:'🇨🇻', a:'카보베르데',     hs:0,    as:0,    done:true,  date:'6/15', venue:'애틀랜타'},
-  {g:'그룹 H', hf:'🇪🇸', h:'스페인',     af:'🇸🇦', a:'사우디아라비아',  hs:null, as:null, done:false, date:'6/21', venue:'애틀랜타'},
+  {g:'그룹 H', hf:'🇪🇸', h:'스페인',     af:'🇸🇦', a:'사우디아라비아',  hs:4,    as:0,    done:true,  date:'6/21', venue:'애틀랜타'},
   {g:'그룹 H', hf:'🇺🇾', h:'우루과이',   af:'🇪🇸', a:'스페인',        hs:null, as:null, done:false, date:'6/26', venue:'과달라하라'},
   {g:'그룹 J', hf:'🇦🇷', h:'아르헨티나',  af:'🇩🇿', a:'알제리',        hs:3,    as:0,    done:true,  date:'6/16', venue:'캔자스시티'},
-  {g:'그룹 J', hf:'🇦🇷', h:'아르헨티나',  af:'🇦🇹', a:'오스트리아',     hs:null, as:null, done:false, date:'6/22', venue:'댈러스'},
+  {g:'그룹 J', hf:'🇦🇷', h:'아르헨티나',  af:'🇦🇹', a:'오스트리아',     hs:2,    as:0,    done:true,  date:'6/22', venue:'댈러스'},
   {g:'그룹 J', hf:'🇯🇴', h:'요르단',     af:'🇦🇷', a:'아르헨티나',     hs:null, as:null, done:false, date:'6/27', venue:'댈러스'},
   {g:'그룹 I', hf:'🇫🇷', h:'프랑스',     af:'🇸🇳', a:'세네갈',        hs:3,    as:1,    done:true,  date:'6/16', venue:'뉴욕'},
   {g:'그룹 I', hf:'🇳🇴', h:'노르웨이',   af:'🇮🇶', a:'이라크',        hs:4,    as:1,    done:true,  date:'6/16', venue:'보스턴'},
-  {g:'그룹 I', hf:'🇫🇷', h:'프랑스',     af:'🇮🇶', a:'이라크',        hs:null, as:null, done:false, date:'6/22', venue:'필라델피아'},
-  {g:'그룹 I', hf:'🇳🇴', h:'노르웨이',   af:'🇸🇳', a:'세네갈',        hs:null, as:null, done:false, date:'6/22', venue:'뉴욕'},
+  {g:'그룹 I', hf:'🇫🇷', h:'프랑스',     af:'🇮🇶', a:'이라크',        hs:3,    as:0,    done:true,  date:'6/22', venue:'필라델피아'},
+  {g:'그룹 I', hf:'🇳🇴', h:'노르웨이',   af:'🇸🇳', a:'세네갈',        hs:3,    as:2,    done:true,  date:'6/22', venue:'뉴욕'},
   {g:'그룹 I', hf:'🇳🇴', h:'노르웨이',   af:'🇫🇷', a:'프랑스',        hs:null, as:null, done:false, date:'6/26', venue:'보스턴'},
   {g:'그룹 I', hf:'🇸🇳', h:'세네갈',    af:'🇮🇶', a:'이라크',        hs:null, as:null, done:false, date:'6/26', venue:'토론토'},
   {g:'그룹 L', hf:'🇬🇧', h:'잉글랜드',   af:'🇭🇷', a:'크로아티아',     hs:4,    as:2,    done:true,  date:'6/17', venue:'댈러스'},
   {g:'그룹 L', hf:'🇬🇭', h:'가나',       af:'🇵🇦', a:'파나마',        hs:1,    as:0,    done:true,  date:'6/18', venue:'댈러스'},
-  {g:'그룹 L', hf:'🇬🇧', h:'잉글랜드',   af:'🇬🇭', a:'가나',         hs:null, as:null, done:false, date:'6/23', venue:'보스턴'},
-  {g:'그룹 L', hf:'🇵🇦', h:'파나마',     af:'🇬🇧', a:'잉글랜드',    hs:null, as:null, done:false, date:'6/27', venue:'뉴욕'},
-  {g:'그룹 F', hf:'🇳🇱', h:'네덜란드',   af:'🇯🇵', a:'일본',         hs:2,    as:2,    done:true,  date:'6/14', venue:'댈러스'},
-  {g:'그룹 F', hf:'🇸🇪', h:'스웨덴',     af:'🇹🇳', a:'튀니지',       hs:5,    as:1,    done:true,  date:'6/14', venue:'몬테레이'},
-  {g:'그룹 F', hf:'🇹🇳', h:'튀니지',     af:'🇯🇵', a:'일본',         hs:0,    as:4,    done:true,  date:'6/21', venue:'몬테레이'},
-  {g:'그룹 F', hf:'🇳🇱', h:'네덜란드',   af:'🇸🇪', a:'스웨덴',       hs:5,    as:1,    done:true,  date:'6/21', venue:'휴스턴'},
-  {g:'그룹 F', hf:'🇯🇵', h:'일본',       af:'🇸🇪', a:'스웨덴',       hs:null, as:null, done:false, date:'6/25', venue:'댈러스'},
-  {g:'그룹 F', hf:'🇹🇳', h:'튀니지',     af:'🇳🇱', a:'네덜란드',     hs:null, as:null, done:false, date:'6/25', venue:'캔자스시티'},
+  {g:'그룹 L', hf:'🇬🇧', h:'잉글랜드',   af:'🇬🇭', a:'가나',          hs:0,    as:0,    done:true,  date:'6/23', venue:'보스턴'},
+  {g:'그룹 L', hf:'🇵🇦', h:'파나마',     af:'🇬🇧', a:'잉글랜드',      hs:null, as:null, done:false, date:'6/27', venue:'뉴욕'},
+  {g:'그룹 F', hf:'🇳🇱', h:'네덜란드',   af:'🇯🇵', a:'일본',          hs:2,    as:2,    done:true,  date:'6/14', venue:'댈러스'},
+  {g:'그룹 F', hf:'🇸🇪', h:'스웨덴',     af:'🇹🇳', a:'튀니지',        hs:5,    as:1,    done:true,  date:'6/14', venue:'몬테레이'},
+  {g:'그룹 F', hf:'🇹🇳', h:'튀니지',     af:'🇯🇵', a:'일본',          hs:0,    as:4,    done:true,  date:'6/20', venue:'몬테레이'},
+  {g:'그룹 F', hf:'🇳🇱', h:'네덜란드',   af:'🇸🇪', a:'스웨덴',        hs:5,    as:1,    done:true,  date:'6/20', venue:'휴스턴'},
+  {g:'그룹 F', hf:'🇯🇵', h:'일본',       af:'🇸🇪', a:'스웨덴',        hs:null, as:null, done:false, date:'6/25', venue:'댈러스'},
+  {g:'그룹 F', hf:'🇹🇳', h:'튀니지',     af:'🇳🇱', a:'네덜란드',      hs:null, as:null, done:false, date:'6/25', venue:'캔자스시티'},
 ];
 
 let currentFilter = 'all';
