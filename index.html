@@ -92,6 +92,27 @@ body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:#f2f2ef;colo
 .p-amount{font-size:14px;font-weight:700}
 .p-share{font-size:10px;color:#bbb}
 .rules-box{background:#fafaf8;border-radius:12px;padding:14px;font-size:12px;color:#999;line-height:2;margin-top:8px}
+
+/* 토너먼트 대진표 */
+.bracket-wrap{overflow-x:auto;padding-bottom:1rem}
+.bracket{display:flex;gap:0;align-items:stretch;min-width:600px}
+.bracket-round{display:flex;flex-direction:column;flex:1;min-width:130px}
+.round-label{font-size:10px;font-weight:700;color:#bbb;letter-spacing:1px;text-align:center;padding:6px 4px;text-transform:uppercase;margin-bottom:6px}
+.bracket-slots{display:flex;flex-direction:column;flex:1;justify-content:space-around}
+.b-match{background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,0.07);margin:4px;overflow:hidden;position:relative}
+.b-match.our-match{border:2px solid #059669}
+.b-match.tbd{opacity:0.6}
+.b-team{display:flex;align-items:center;gap:6px;padding:7px 10px;font-size:11px;font-weight:500;color:#444;border-bottom:1px solid #f2f2ef;position:relative}
+.b-team:last-child{border-bottom:none}
+.b-team.winner{background:#f0fdf4;color:#059669;font-weight:700}
+.b-team.our{color:#059669;font-weight:700}
+.b-team .b-flag{font-size:16px;flex-shrink:0}
+.b-team .b-name{flex:1;line-height:1.2}
+.b-team .b-score{font-size:12px;font-weight:700;color:#1a1a1a;min-width:16px;text-align:right}
+.b-team.winner .b-score{color:#059669}
+.b-match-date{font-size:9px;color:#ccc;padding:3px 10px;background:#fafaf8;text-align:center}
+.connector{display:flex;flex-direction:column;justify-content:space-around;width:16px;flex-shrink:0}
+.conn-line{flex:1;border-right:2px solid #e8e8e4;margin:8px 0}
 </style>
 </head>
 <body>
@@ -106,6 +127,7 @@ body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:#f2f2ef;colo
   <div class="tabs">
     <button class="tab active" onclick="goTab('home',this)">오늘의 상금</button>
     <button class="tab" onclick="goTab('schedule',this)">경기 일정</button>
+    <button class="tab" onclick="goTab('bracket',this)">토너먼트</button>
     <button class="tab" onclick="goTab('prize',this)">상금 분배</button>
   </div>
 
@@ -155,6 +177,11 @@ body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:#f2f2ef;colo
     </div>
     <div class="ai-status" id="ai-status"></div>
     <div id="sch-list"></div>
+  </div>
+
+  <!-- BRACKET -->
+  <div class="page" id="page-bracket">
+    <div id="bracket-root"></div>
   </div>
 
   <!-- PRIZE -->
@@ -230,26 +257,29 @@ const TODAY_STR = `${_d.getMonth()+1}/${_d.getDate()}`;
 let SCHED = [
   {g:'그룹 H', hf:'🇪🇸', h:'스페인',     af:'🇨🇻', a:'카보베르데',     hs:0,    as:0,    done:true,  date:'6/15', venue:'애틀랜타'},
   {g:'그룹 H', hf:'🇪🇸', h:'스페인',     af:'🇸🇦', a:'사우디아라비아',  hs:4,    as:0,    done:true,  date:'6/21', venue:'애틀랜타'},
-  {g:'그룹 H', hf:'🇺🇾', h:'우루과이',   af:'🇪🇸', a:'스페인',        hs:null, as:null, done:false, date:'6/26', venue:'과달라하라'},
+  {g:'그룹 H', hf:'🇨🇻', h:'카보베르데',  af:'🇸🇦', a:'사우디아라비아',  hs:0,    as:0,    done:true,  date:'6/26', venue:'휴스턴'},
+  {g:'그룹 H', hf:'🇺🇾', h:'우루과이',   af:'🇪🇸', a:'스페인',        hs:0,    as:1,    done:true,  date:'6/26', venue:'과달라하라'},
   {g:'그룹 J', hf:'🇦🇷', h:'아르헨티나',  af:'🇩🇿', a:'알제리',        hs:3,    as:0,    done:true,  date:'6/16', venue:'캔자스시티'},
   {g:'그룹 J', hf:'🇦🇷', h:'아르헨티나',  af:'🇦🇹', a:'오스트리아',     hs:2,    as:0,    done:true,  date:'6/22', venue:'댈러스'},
+  {g:'그룹 J', hf:'🇩🇿', h:'알제리',     af:'🇦🇹', a:'오스트리아',     hs:null, as:null, done:false, date:'6/27', venue:'캔자스시티'},
   {g:'그룹 J', hf:'🇯🇴', h:'요르단',     af:'🇦🇷', a:'아르헨티나',     hs:null, as:null, done:false, date:'6/27', venue:'댈러스'},
   {g:'그룹 I', hf:'🇫🇷', h:'프랑스',     af:'🇸🇳', a:'세네갈',        hs:3,    as:1,    done:true,  date:'6/16', venue:'뉴욕'},
   {g:'그룹 I', hf:'🇳🇴', h:'노르웨이',   af:'🇮🇶', a:'이라크',        hs:4,    as:1,    done:true,  date:'6/16', venue:'보스턴'},
   {g:'그룹 I', hf:'🇫🇷', h:'프랑스',     af:'🇮🇶', a:'이라크',        hs:3,    as:0,    done:true,  date:'6/22', venue:'필라델피아'},
   {g:'그룹 I', hf:'🇳🇴', h:'노르웨이',   af:'🇸🇳', a:'세네갈',        hs:3,    as:2,    done:true,  date:'6/22', venue:'뉴욕'},
-  {g:'그룹 I', hf:'🇳🇴', h:'노르웨이',   af:'🇫🇷', a:'프랑스',        hs:null, as:null, done:false, date:'6/26', venue:'보스턴'},
-  {g:'그룹 I', hf:'🇸🇳', h:'세네갈',    af:'🇮🇶', a:'이라크',        hs:null, as:null, done:false, date:'6/26', venue:'토론토'},
+  {g:'그룹 I', hf:'🇳🇴', h:'노르웨이',   af:'🇫🇷', a:'프랑스',        hs:1,    as:4,    done:true,  date:'6/26', venue:'보스턴'},
+  {g:'그룹 I', hf:'🇸🇳', h:'세네갈',    af:'🇮🇶', a:'이라크',        hs:5,    as:0,    done:true,  date:'6/26', venue:'토론토'},
   {g:'그룹 L', hf:'🇬🇧', h:'잉글랜드',   af:'🇭🇷', a:'크로아티아',     hs:4,    as:2,    done:true,  date:'6/17', venue:'댈러스'},
   {g:'그룹 L', hf:'🇬🇭', h:'가나',       af:'🇵🇦', a:'파나마',        hs:1,    as:0,    done:true,  date:'6/18', venue:'댈러스'},
   {g:'그룹 L', hf:'🇬🇧', h:'잉글랜드',   af:'🇬🇭', a:'가나',          hs:0,    as:0,    done:true,  date:'6/23', venue:'보스턴'},
-  {g:'그룹 L', hf:'🇵🇦', h:'파나마',     af:'🇬🇧', a:'잉글랜드',      hs:null, as:null, done:false, date:'6/27', venue:'뉴욕'},
+  {g:'그룹 L', hf:'🇵🇦', h:'파나마',     af:'🇬🇧', a:'잉글랜드',      hs:0,    as:2,    done:true,  date:'6/27', venue:'뉴저지'},
+  {g:'그룹 L', hf:'🇭🇷', h:'크로아티아',  af:'🇬🇭', a:'가나',          hs:2,    as:1,    done:true,  date:'6/27', venue:'필라델피아'},
   {g:'그룹 F', hf:'🇳🇱', h:'네덜란드',   af:'🇯🇵', a:'일본',          hs:2,    as:2,    done:true,  date:'6/14', venue:'댈러스'},
   {g:'그룹 F', hf:'🇸🇪', h:'스웨덴',     af:'🇹🇳', a:'튀니지',        hs:5,    as:1,    done:true,  date:'6/14', venue:'몬테레이'},
   {g:'그룹 F', hf:'🇹🇳', h:'튀니지',     af:'🇯🇵', a:'일본',          hs:0,    as:4,    done:true,  date:'6/20', venue:'몬테레이'},
   {g:'그룹 F', hf:'🇳🇱', h:'네덜란드',   af:'🇸🇪', a:'스웨덴',        hs:5,    as:1,    done:true,  date:'6/20', venue:'휴스턴'},
-  {g:'그룹 F', hf:'🇯🇵', h:'일본',       af:'🇸🇪', a:'스웨덴',        hs:null, as:null, done:false, date:'6/25', venue:'댈러스'},
-  {g:'그룹 F', hf:'🇹🇳', h:'튀니지',     af:'🇳🇱', a:'네덜란드',      hs:null, as:null, done:false, date:'6/25', venue:'캔자스시티'},
+  {g:'그룹 F', hf:'🇯🇵', h:'일본',       af:'🇸🇪', a:'스웨덴',        hs:1,    as:1,    done:true,  date:'6/25', venue:'댈러스'},
+  {g:'그룹 F', hf:'🇹🇳', h:'튀니지',     af:'🇳🇱', a:'네덜란드',      hs:1,    as:3,    done:true,  date:'6/25', venue:'캔자스시티'},
 ];
 
 let currentFilter = 'all';
@@ -263,7 +293,90 @@ function goTab(t,el){
   el.classList.add('active');
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+t).classList.add('active');
+  if(t==='bracket') renderBracket();
 }
+
+// ── 토너먼트 대진표 ──────────────────────────────────────────
+const OUR_SET = new Set(OUR);
+const BRACKET = {
+  r32: [
+    {id:73, h:'캐나다',      hf:'🇨🇦', a:'남아공',      af:'🇿🇦', hs:null,as:null,date:'6/28'},
+    {id:74, h:'독일',        hf:'🇩🇪', a:'3위팀',       af:'❓',   hs:null,as:null,date:'6/29'},
+    {id:75, h:'네덜란드',    hf:'🇳🇱', a:'모로코',      af:'🇲🇦', hs:null,as:null,date:'6/29'},
+    {id:76, h:'브라질',      hf:'🇧🇷', a:'일본',        af:'🇯🇵', hs:null,as:null,date:'6/29'},
+    {id:77, h:'프랑스',      hf:'🇫🇷', a:'스웨덴',      af:'🇸🇪', hs:null,as:null,date:'6/30'},
+    {id:78, h:'코트디부아르', hf:'🇨🇮', a:'노르웨이',    af:'🇳🇴', hs:null,as:null,date:'6/30'},
+    {id:79, h:'멕시코',      hf:'🇲🇽', a:'3위팀',       af:'❓',   hs:null,as:null,date:'6/30'},
+    {id:80, h:'잉글랜드',    hf:'🇬🇧', a:'세네갈',      af:'🇸🇳', hs:null,as:null,date:'7/1'},
+    {id:81, h:'미국',        hf:'🇺🇸', a:'보스니아',    af:'🇧🇦', hs:null,as:null,date:'7/1'},
+    {id:82, h:'벨기에',      hf:'🇧🇪', a:'3위팀',       af:'❓',   hs:null,as:null,date:'7/1'},
+    {id:83, h:'스코틀랜드',  hf:'🏴󠁧󠁢󠁳󠁣󠁴󠁿', a:'3위팀',       af:'❓',   hs:null,as:null,date:'7/2'},
+    {id:84, h:'스페인',      hf:'🇪🇸', a:'카보베르데',  af:'🇨🇻', hs:null,as:null,date:'7/2'},
+    {id:85, h:'스위스',      hf:'🇨🇭', a:'3위팀',       af:'❓',   hs:null,as:null,date:'7/2'},
+    {id:86, h:'아르헨티나',  hf:'🇦🇷', a:'카보베르데',  af:'🇨🇻', hs:null,as:null,date:'7/3'},
+    {id:87, h:'포르투갈',    hf:'🇵🇹', a:'3위팀',       af:'❓',   hs:null,as:null,date:'7/3'},
+    {id:88, h:'터키',        hf:'🇹🇷', a:'이집트',      af:'🇪🇬', hs:null,as:null,date:'7/3'},
+  ],
+  r16:[],qf:[],sf:[],final:[]
+};
+
+function bTeam(flag,name,score,isWin){
+  const isOur=OUR_SET.has(name);
+  return `<div class="b-team${isWin?' winner':''}${isOur?' our':''}">
+    <span class="b-flag">${flag}</span>
+    <span class="b-name">${name}</span>
+    ${score!==null?`<span class="b-score">${score}</span>`:''}
+  </div>`;
+}
+
+function bMatch(m){
+  const done=m.hs!==null&&m.as!==null;
+  const hWin=done&&m.hs>m.as, aWin=done&&m.as>m.hs;
+  const isOur=OUR_SET.has(m.h)||OUR_SET.has(m.a);
+  return `<div class="b-match${isOur?' our-match':''}${!done?' tbd':''}">
+    <div class="b-match-date">${m.date}</div>
+    ${bTeam(m.hf,m.h,done?m.hs:null,hWin)}
+    ${bTeam(m.af,m.a,done?m.as:null,aWin)}
+  </div>`;
+}
+
+function renderBracket(){
+  // 우리가 볼 팀 중심으로: R32 → 이후 라운드는 TBD로 표시
+  const r32 = BRACKET.r32;
+  // 16강: r32의 홀/짝 쌍으로 묶기
+  const r16 = [];
+  for(let i=0;i<r32.length;i+=2) r16.push({h:'승자 M'+(r32[i]?.id||'?'),hf:'🏆',a:'승자 M'+(r32[i+1]?.id||'?'),af:'🏆',hs:null,as:null,date:'7/5~7'});
+  const qf = [];
+  for(let i=0;i<r16.length;i+=2) qf.push({h:'승자',hf:'🏆',a:'승자',af:'🏆',hs:null,as:null,date:'7/9~11'});
+  const sf = [];
+  for(let i=0;i<qf.length;i+=2) sf.push({h:'승자',hf:'🏆',a:'승자',af:'🏆',hs:null,as:null,date:'7/14~15'});
+  const fin = [{h:'승자',hf:'🏆',a:'승자',af:'🏆',hs:null,as:null,date:'7/19'}];
+
+  // 먼저 우리 팀만 필터해서 관련 매치 강조
+  const rounds = [
+    {label:'16강 (R32)', matches:r32},
+    {label:'8강',        matches:r16},
+    {label:'준결승',     matches:qf},
+    {label:'결승',       matches:fin},
+  ];
+
+  let html = `<div class="slabel" style="margin-bottom:8px">🏆 토너먼트 대진표</div>
+    <div style="font-size:11px;color:#bbb;margin-bottom:10px">🟢 우리 팀 경기</div>
+    <div class="bracket-wrap"><div class="bracket">`;
+
+  rounds.forEach((r,ri)=>{
+    html+=`<div class="bracket-round">
+      <div class="round-label">${r.label}</div>
+      <div class="bracket-slots">`;
+    r.matches.forEach(m=>{ html+=bMatch(m); });
+    html+=`</div></div>`;
+    if(ri<rounds.length-1) html+=`<div class="connector">${r.matches.map((_,i)=>i%2===0?'<div class="conn-line"></div>':'').join('')}</div>`;
+  });
+
+  html+=`</div></div>`;
+  document.getElementById('bracket-root').innerHTML=html;
+}
+// ───────────────────────────────────────────────────────────
 
 function renderHero(){
   const diff=currentAmount-BASE;
@@ -343,10 +456,11 @@ async function applyAmount(){
 function renderSchedule(filter){
   currentFilter=filter;
   const matches=filter==='all'?SCHED:SCHED.filter(m=>m.h===filter||m.a===filter);
-  const done=matches.filter(m=>m.done&&!m.live);
+  const parseDate=d=>{const[mo,da]=d.split('/').map(Number);return mo*100+da;};
+  const done=matches.filter(m=>m.done&&!m.live).sort((a,b)=>parseDate(b.date)-parseDate(a.date));
   const live=matches.filter(m=>m.live);
   const todayM=matches.filter(m=>!m.done&&!m.live&&m.date===TODAY_STR);
-  const upcoming=matches.filter(m=>!m.done&&!m.live&&m.date!==TODAY_STR);
+  const upcoming=matches.filter(m=>!m.done&&!m.live&&m.date!==TODAY_STR).sort((a,b)=>parseDate(a.date)-parseDate(b.date));
 
   function card(m){
     const hO=OUR.includes(m.h),aO=OUR.includes(m.a);
