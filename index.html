@@ -288,36 +288,82 @@ function goTab(t,el){
 
 // ── 토너먼트 ──────────────────────────────────────────────
 const OUR_SET = new Set(OUR);
-// KST = ET + 13h. 날짜는 KST 기준
-const R32 = [
-  // 6/29(일) — 6/28 3PM ET
-  {h:'남아공',      hf:'🇿🇦', a:'캐나다',       af:'🇨🇦', hs:null,as:null,done:false,kst:'6/29(일) 04:00',round:'16강'},
-  // 6/30(월) — 6/29 ET
-  {h:'브라질',      hf:'🇧🇷', a:'일본',         af:'🇯🇵', hs:null,as:null,done:false,kst:'6/30(월) 02:00',round:'16강'},
-  {h:'독일',        hf:'🇩🇪', a:'파라과이',     af:'🇵🇾', hs:null,as:null,done:false,kst:'6/30(월) 05:30',round:'16강'},
-  {h:'네덜란드',    hf:'🇳🇱', a:'모로코',       af:'🇲🇦', hs:null,as:null,done:false,kst:'6/30(월) 10:00',round:'16강'},
-  // 7/1(화) — 6/30 ET
-  {h:'코트디부아르',hf:'🇨🇮', a:'노르웨이',     af:'🇳🇴', hs:null,as:null,done:false,kst:'7/1(화) 02:00',round:'16강'},
-  {h:'프랑스',      hf:'🇫🇷', a:'스웨덴',       af:'🇸🇪', hs:null,as:null,done:false,kst:'7/1(화) 06:00',round:'16강'},
-  {h:'멕시코',      hf:'🇲🇽', a:'에콰도르',     af:'🇪🇨', hs:null,as:null,done:false,kst:'7/1(화) 10:00',round:'16강'},
-  // 7/2(수) — 7/1 ET
-  {h:'잉글랜드',    hf:'🇬🇧', a:'DR콩고',       af:'🇨🇩', hs:null,as:null,done:false,kst:'7/2(수) 01:00',round:'16강'},
-  {h:'벨기에',      hf:'🇧🇪', a:'세네갈',       af:'🇸🇳', hs:null,as:null,done:false,kst:'7/2(수) 05:00',round:'16강'},
-  {h:'미국',        hf:'🇺🇸', a:'보스니아',     af:'🇧🇦', hs:null,as:null,done:false,kst:'7/2(수) 09:00',round:'16강'},
-  // 7/3(목) — 7/2 ET
-  {h:'스페인',      hf:'🇪🇸', a:'오스트리아',   af:'🇦🇹', hs:null,as:null,done:false,kst:'7/3(목) 04:00',round:'16강'},
-  {h:'포르투갈',    hf:'🇵🇹', a:'크로아티아',   af:'🇭🇷', hs:null,as:null,done:false,kst:'7/3(목) 08:00',round:'16강'},
-  {h:'스위스',      hf:'🇨🇭', a:'알제리',       af:'🇩🇿', hs:null,as:null,done:false,kst:'7/3(목) 12:00',round:'16강'},
-  // 7/4(금) — 7/3 ET
-  {h:'호주',        hf:'🇦🇺', a:'이집트',       af:'🇪🇬', hs:null,as:null,done:false,kst:'7/4(금) 03:00',round:'16강'},
-  {h:'아르헨티나',  hf:'🇦🇷', a:'카보베르데',   af:'🇨🇻', hs:null,as:null,done:false,kst:'7/4(금) 07:00',round:'16강'},
-  {h:'콜롬비아',    hf:'🇨🇴', a:'가나',         af:'🇬🇭', hs:null,as:null,done:false,kst:'7/4(금) 10:30',round:'16강'},
-  // 8강~결승 TBD
-  {h:'승자1',hf:'🏆',a:'승자2',af:'🏆',hs:null,as:null,done:false,kst:'7/5~7',round:'8강'},
-  {h:'승자3',hf:'🏆',a:'승자4',af:'🏆',hs:null,as:null,done:false,kst:'7/5~7',round:'8강'},
-  {h:'승자5',hf:'🏆',a:'승자6',af:'🏆',hs:null,as:null,done:false,kst:'7/9~11',round:'준결승'},
-  {h:'승자7',hf:'🏆',a:'승자8',af:'🏆',hs:null,as:null,done:false,kst:'7/14~15',round:'결승'},
+
+// 국가 약어 → 한국어 + 국기 매핑 (API 코드 기준)
+const TEAM_MAP = {
+  RSA:{n:'남아공',   f:'🇿🇦'}, CAN:{n:'캐나다',     f:'🇨🇦'}, BRA:{n:'브라질',    f:'🇧🇷'},
+  JPN:{n:'일본',     f:'🇯🇵'}, GER:{n:'독일',       f:'🇩🇪'}, PAR:{n:'파라과이',  f:'🇵🇾'},
+  NED:{n:'네덜란드', f:'🇳🇱'}, MAR:{n:'모로코',     f:'🇲🇦'}, CIV:{n:'코트디부아르',f:'🇨🇮'},
+  NOR:{n:'노르웨이', f:'🇳🇴'}, FRA:{n:'프랑스',     f:'🇫🇷'}, SWE:{n:'스웨덴',    f:'🇸🇪'},
+  MEX:{n:'멕시코',   f:'🇲🇽'}, ECU:{n:'에콰도르',   f:'🇪🇨'}, ENG:{n:'잉글랜드',  f:'🇬🇧'},
+  COD:{n:'DR콩고',   f:'🇨🇩'}, BEL:{n:'벨기에',     f:'🇧🇪'}, SEN:{n:'세네갈',    f:'🇸🇳'},
+  USA:{n:'미국',     f:'🇺🇸'}, BIH:{n:'보스니아',   f:'🇧🇦'}, ESP:{n:'스페인',    f:'🇪🇸'},
+  AUT:{n:'오스트리아',f:'🇦🇹'}, POR:{n:'포르투갈',  f:'🇵🇹'}, CRO:{n:'크로아티아',f:'🇭🇷'},
+  SUI:{n:'스위스',   f:'🇨🇭'}, DZA:{n:'알제리',     f:'🇩🇿'}, AUS:{n:'호주',      f:'🇦🇺'},
+  EGY:{n:'이집트',   f:'🇪🇬'}, ARG:{n:'아르헨티나', f:'🇦🇷'}, CPV:{n:'카보베르데',f:'🇨🇻'},
+  COL:{n:'콜롬비아', f:'🇨🇴'}, GHA:{n:'가나',       f:'🇬🇭'},
+};
+
+// 브래킷 구조: 16강 페어 순서 (공식 대진 기준)
+// 각 쌍의 승자끼리 8강에서 붙음: [0,1]→QF1, [2,3]→QF1, [4,5]→QF2, [6,7]→QF2 ...
+const BRACKET_PAIRS = [
+  // 8강 A: 남아공/캐나다 vs 네덜란드/모로코
+  {hc:'RSA', ac:'CAN', kst:'6/29(일) 04:00'},
+  {hc:'NED', ac:'MAR', kst:'6/30(월) 10:00'},
+  // 8강 B: 독일/파라과이 vs 프랑스/스웨덴
+  {hc:'GER', ac:'PAR', kst:'6/30(월) 05:30'},
+  {hc:'FRA', ac:'SWE', kst:'7/1(화) 06:00'},
+  // 8강 C: 브라질/일본 vs 코트디부아르/노르웨이
+  {hc:'BRA', ac:'JPN', kst:'6/30(월) 02:00'},
+  {hc:'CIV', ac:'NOR', kst:'7/1(화) 02:00'},
+  // 8강 D: 멕시코/에콰도르 vs 잉글랜드/DR콩고
+  {hc:'MEX', ac:'ECU', kst:'7/1(화) 10:00'},
+  {hc:'ENG', ac:'COD', kst:'7/2(수) 01:00'},
+  // 8강 E: 스페인/오스트리아 vs 포르투갈/크로아티아
+  {hc:'ESP', ac:'AUT', kst:'7/3(목) 04:00'},
+  {hc:'POR', ac:'CRO', kst:'7/3(목) 08:00'},
+  // 8강 F: 벨기에/세네갈 vs 미국/보스니아
+  {hc:'BEL', ac:'SEN', kst:'7/2(수) 05:00'},
+  {hc:'USA', ac:'BIH', kst:'7/2(수) 09:00'},
+  // 8강 G: 호주/이집트 vs 아르헨티나/카보베르데
+  {hc:'AUS', ac:'EGY', kst:'7/4(금) 03:00'},
+  {hc:'ARG', ac:'CPV', kst:'7/4(금) 07:00'},
+  // 8강 H: 콜롬비아/가나 vs 스위스/알제리
+  {hc:'COL', ac:'GHA', kst:'7/4(금) 10:30'},
+  {hc:'SUI', ac:'DZA', kst:'7/3(목) 12:00'},
 ];
+
+// 실제 결과 저장소 (API에서 채워짐) key: "HC-AC"
+const RESULTS = {
+  'RSA-CAN': {hs:0, as:1, pso:null, done:true},   // 캐나다 승
+  'BRA-JPN': {hs:2, as:1, pso:null, done:true},   // 브라질 승
+  'GER-PAR': {hs:1, as:1, pso:'PAR', done:true},  // 파라과이 PSO 승
+  'NED-MAR': {hs:1, as:1, pso:'MAR', done:true},  // 모로코 PSO 승
+  'CIV-NOR': {hs:1, as:2, pso:null, done:true},   // 노르웨이 승
+  'FRA-SWE': {hs:3, as:0, pso:null, done:true},   // 프랑스 승
+  'MEX-ECU': {hs:2, as:0, pso:null, done:true},   // 멕시코 승
+};
+
+// 승자 결정 함수
+function getWinner(hc, ac) {
+  const key = `${hc}-${ac}`;
+  const r = RESULTS[key];
+  if (!r || !r.done) return null;
+  if (r.pso) return r.pso;
+  if (r.hs > r.as) return hc;
+  if (r.as > r.hs) return ac;
+  return null;
+}
+
+// 스코어 표시 문자열
+function scoreStr(hc, ac) {
+  const key = `${hc}-${ac}`;
+  const r = RESULTS[key];
+  if (!r || !r.done) return null;
+  let s = `${r.hs}:${r.as}`;
+  if (r.pso) s += ` (PSO: ${TEAM_MAP[r.pso]?.n||r.pso} 승)`;
+  return s;
+}
 
 let bracketView = 'list';
 
@@ -328,20 +374,31 @@ function switchBracketView(v, el){
   renderBracket();
 }
 
-function matchCard(m){
-  const hO=OUR_SET.has(m.h), aO=OUR_SET.has(m.a);
-  const isOur=hO||aO;
-  const done=m.hs!==null&&m.as!==null;
-  const isNow = !done && m.kst.includes(TODAY_STR.replace('/','/'));
-  return `<div class="match-card${isOur?' today-match':''}${isNow?' today-match':''}">
+function matchCard(p, idx){
+  const h = TEAM_MAP[p.hc], a = TEAM_MAP[p.ac];
+  if (!h || !a) return '';
+  const hO = OUR_SET.has(h.n), aO = OUR_SET.has(a.n);
+  const isOur = hO||aO;
+  const key = `${p.hc}-${p.ac}`;
+  const r = RESULTS[key];
+  const done = r?.done;
+  const sc = scoreStr(p.hc, p.ac);
+  const winner = getWinner(p.hc, p.ac);
+  return `<div class="match-card${isOur?' today-match':''}">
     <div class="match-meta">
-      <span style="font-weight:700;color:#6366f1">${m.round}</span>
-      <span>🇰🇷 ${m.kst}</span>
+      <span style="font-weight:700;color:#6366f1">16강</span>
+      <span>🇰🇷 ${p.kst}</span>
     </div>
     <div class="match-teams">
-      <div class="team-s"><span class="tflag">${m.hf}</span><span class="tname${hO?' our':''}">${m.h}</span></div>
-      <div class="score-b ${done?'done':isNow?'today-s':'up'}">${done?(m.hs+':'+m.as):isNow?'오늘':'vs'}</div>
-      <div class="team-s r"><span class="tflag">${m.af}</span><span class="tname${aO?' our':''}">${m.a}</span></div>
+      <div class="team-s">
+        <span class="tflag">${h.f}</span>
+        <span class="tname${hO?' our':''}${winner===p.hc?' win':''}">${h.n}</span>
+      </div>
+      <div class="score-b ${done?'done':'up'}">${done?sc:'vs'}</div>
+      <div class="team-s r">
+        <span class="tflag">${a.f}</span>
+        <span class="tname${aO?' our':''}${winner===p.ac?' win':''}">${a.n}</span>
+      </div>
     </div>
   </div>`;
 }
@@ -349,102 +406,81 @@ function matchCard(m){
 function renderBracket(){
   const root = document.getElementById('bracket-root');
   if(bracketView==='list'){
-    // 라운드별 그룹핑
-    const rounds = [...new Set(R32.map(m=>m.round))];
-    let html = `<div style="font-size:11px;color:#059669;margin-bottom:10px;font-weight:600">🟢 우리 팀 경기 · 🇰🇷 한국시간 기준</div>`;
-    rounds.forEach(r=>{
-      const ms = R32.filter(m=>m.round===r);
-      html += `<div class="slabel">${r}</div>`;
-      ms.forEach(m=>{ html+=matchCard(m); });
-    });
+    let html = `<div style="font-size:11px;color:#059669;margin-bottom:10px;font-weight:600">🟢 우리 팀 · 🇰🇷 한국시간 · PSO=승부차기</div>`;
+    html += `<div class="slabel">16강</div>`;
+    BRACKET_PAIRS.forEach((p,i) => { html += matchCard(p, i); });
     root.innerHTML = html;
   } else {
-    // 대진표 트리뷰 — 공식 브래킷 연결 순서
-    // 16강 쌍: [0,1] → 8강A, [2,3] → 8강B, [4,5] → 8강C, [6,7] → 8강D
-    //          [8,9] → 8강E, [10,11] → 8강F, [12,13] → 8강G, [14,15] → 8강H
-    // 8강: A vs B, C vs D, E vs F, G vs H → 준결승
-    // 공식 브래킷 연결 순서 (R16 페어링 기준)
-    // R16-1: 남아공/캐나다 vs 네덜란드/모로코
-    // R16-2: 독일/파라과이 vs 프랑스/스웨덴
-    // R16-3: 브라질/일본 vs 코트디부아르/노르웨이
-    // R16-4: 멕시코/에콰도르 vs 잉글랜드/DR콩고
-    // R16-5: 스페인/오스트리아 vs 포르투갈/크로아티아
-    // R16-6: 벨기에/세네갈 vs 미국/보스니아
-    // R16-7: 호주/이집트 vs 아르헨티나/카보베르데
-    // R16-8: 콜롬비아/가나 vs 스위스/알제리
-    const bracketOrder = [
-      {h:'남아공',      hf:'🇿🇦', a:'캐나다',       af:'🇨🇦', kst:'6/29(일) 04:00'},
-      {h:'네덜란드',    hf:'🇳🇱', a:'모로코',       af:'🇲🇦', kst:'6/30(월) 10:00'},
-      {h:'독일',        hf:'🇩🇪', a:'파라과이',     af:'🇵🇾', kst:'6/30(월) 05:30'},
-      {h:'프랑스',      hf:'🇫🇷', a:'스웨덴',       af:'🇸🇪', kst:'7/1(화) 06:00'},
-      {h:'브라질',      hf:'🇧🇷', a:'일본',         af:'🇯🇵', kst:'6/30(월) 02:00'},
-      {h:'코트디부아르',hf:'🇨🇮', a:'노르웨이',     af:'🇳🇴', kst:'7/1(화) 02:00'},
-      {h:'멕시코',      hf:'🇲🇽', a:'에콰도르',     af:'🇪🇨', kst:'7/1(화) 10:00'},
-      {h:'잉글랜드',    hf:'🇬🇧', a:'DR콩고',       af:'🇨🇩', kst:'7/2(수) 01:00'},
-      {h:'스페인',      hf:'🇪🇸', a:'오스트리아',   af:'🇦🇹', kst:'7/3(목) 04:00'},
-      {h:'포르투갈',    hf:'🇵🇹', a:'크로아티아',   af:'🇭🇷', kst:'7/3(목) 08:00'},
-      {h:'벨기에',      hf:'🇧🇪', a:'세네갈',       af:'🇸🇳', kst:'7/2(수) 05:00'},
-      {h:'미국',        hf:'🇺🇸', a:'보스니아',     af:'🇧🇦', kst:'7/2(수) 09:00'},
-      {h:'호주',        hf:'🇦🇺', a:'이집트',       af:'🇪🇬', kst:'7/4(금) 03:00'},
-      {h:'아르헨티나',  hf:'🇦🇷', a:'카보베르데',   af:'🇨🇻', kst:'7/4(금) 07:00'},
-      {h:'콜롬비아',    hf:'🇨🇴', a:'가나',         af:'🇬🇭', kst:'7/4(금) 10:30'},
-      {h:'스위스',      hf:'🇨🇭', a:'알제리',       af:'🇩🇿', kst:'7/3(목) 12:00'},
-    ];
-
-    // R32에서 결과 가져오기
-    const getResult = (h) => R32.find(m=>m.h===h||m.a===h) || {};
-
-    function bMatchSlot(m) {
-      const rd = R32.find(r=>(r.h===m.h&&r.a===m.a)||(r.h===m.a&&r.a===m.h)) || {};
-      const hs = rd.hs ?? null, as = rd.as ?? null;
-      const done = hs!==null && as!==null;
-      const hWin = done && hs > as, aWin = done && as > hs;
-      const hO = OUR_SET.has(m.h), aO = OUR_SET.has(m.a);
+    // 대진표 트리뷰 — 승자 자동 전파
+    function slot(hc, ac, kst, round) {
+      const h = TEAM_MAP[hc]||{n:hc,f:'🏆'};
+      const a = TEAM_MAP[ac]||{n:ac,f:'🏆'};
+      const hO = OUR_SET.has(h.n), aO = OUR_SET.has(a.n);
       const isOur = hO||aO;
-      return `<div class="b-match${isOur?' our-match':''}${!done?' tbd':''}">
-        <div class="b-match-date">${m.kst}</div>
-        <div class="b-team${hO?' our':''}${hWin?' winner':''}">
-          <span class="b-flag">${m.hf}</span><span class="b-name">${m.h}</span>${done?`<span class="b-score">${hs}</span>`:''}
+      const key = `${hc}-${ac}`;
+      const r = RESULTS[key];
+      const done = r?.done && hc in TEAM_MAP && ac in TEAM_MAP;
+      const winner = done ? getWinner(hc, ac) : null;
+      const sc = done ? scoreStr(hc, ac) : null;
+      const isTbd = !(hc in TEAM_MAP) || !(ac in TEAM_MAP);
+      return `<div class="b-match${isOur?' our-match':''}${isTbd?' tbd':''}">
+        <div class="b-match-date">${kst}</div>
+        <div class="b-team${hO?' our':''}${winner===hc?' winner':''}">
+          <span class="b-flag">${h.f}</span><span class="b-name">${h.n}${r?.pso===hc?' 🏆':''}</span>${sc?`<span class="b-score">${r.hs}</span>`:''}
         </div>
-        <div class="b-team${aO?' our':''}${aWin?' winner':''}">
-          <span class="b-flag">${m.af}</span><span class="b-name">${m.a}</span>${done?`<span class="b-score">${as}</span>`:''}
+        <div class="b-team${aO?' our':''}${winner===ac?' winner':''}">
+          <span class="b-flag">${a.f}</span><span class="b-name">${a.n}${r?.pso===ac?' 🏆':''}</span>${sc?`<span class="b-score">${r.as}</span>`:''}
         </div>
+        ${r?.pso?`<div class="b-match-date" style="color:#f59e0b">PSO: ${TEAM_MAP[r.pso]?.n} 승</div>`:''}
       </div>`;
     }
 
-    function tbd(date) {
-      return `<div class="b-match tbd">
-        <div class="b-match-date">${date}</div>
-        <div class="b-team"><span class="b-flag">🏆</span><span class="b-name">승자</span></div>
-        <div class="b-team"><span class="b-flag">🏆</span><span class="b-name">승자</span></div>
+    // 8강 승자 계산 (16강 2쌍의 승자끼리)
+    function qfSlot(i, kst) {
+      const p0 = BRACKET_PAIRS[i*2], p1 = BRACKET_PAIRS[i*2+1];
+      const w0 = getWinner(p0.hc, p0.ac);
+      const w1 = getWinner(p1.hc, p1.ac);
+      const hc = w0 || 'TBD', ac = w1 || 'TBD';
+      const h = TEAM_MAP[hc]||{n:'승자',f:'🏆'};
+      const a = TEAM_MAP[ac]||{n:'승자',f:'🏆'};
+      const hO = OUR_SET.has(h.n), aO = OUR_SET.has(a.n);
+      const isOur = hO||aO;
+      const r = RESULTS[`${hc}-${ac}`];
+      const done = r?.done && w0 && w1;
+      const winner = done ? getWinner(hc,ac) : null;
+      return `<div class="b-match${isOur?' our-match':(!w0||!w1)?' tbd':''}"${r?.pso?` style="border-bottom:2px solid #f59e0b"`:''}>
+        <div class="b-match-date">${kst}</div>
+        <div class="b-team${hO?' our':''}${winner===hc?' winner':''}">
+          <span class="b-flag">${h.f}</span><span class="b-name">${h.n}</span>${done?`<span class="b-score">${r.hs}</span>`:''}
+        </div>
+        <div class="b-team${aO?' our':''}${winner===ac?' winner':''}">
+          <span class="b-flag">${a.f}</span><span class="b-name">${a.n}</span>${done?`<span class="b-score">${r.as}</span>`:''}
+        </div>
+        ${r?.pso?`<div class="b-match-date" style="color:#f59e0b">PSO: ${TEAM_MAP[r.pso]?.n} 승</div>`:''}
       </div>`;
     }
 
     const conn = (n) => `<div class="connector">${[...Array(n)].map((_,i)=>i%2===0?'<div class="conn-line"></div>':'').join('')}</div>`;
 
-    let html = `<div style="font-size:11px;color:#059669;margin-bottom:10px;font-weight:600">🟢 우리 팀 · 🇰🇷 한국시간 · 승자끼리 연결</div>
-    <div class="bracket-wrap"><div class="bracket">
-      <div class="bracket-round"><div class="round-label">16강</div><div class="bracket-slots">
-        ${bracketOrder.map(m=>bMatchSlot(m)).join('')}
-      </div></div>
-      ${conn(16)}
-      <div class="bracket-round"><div class="round-label">8강 (7/5~7)</div><div class="bracket-slots">
-        ${[...Array(8)].map(()=>tbd('7/5~7')).join('')}
-      </div></div>
-      ${conn(8)}
-      <div class="bracket-round"><div class="round-label">준결승 (7/9~11)</div><div class="bracket-slots">
-        ${[...Array(4)].map(()=>tbd('7/9~11')).join('')}
-      </div></div>
-      ${conn(4)}
-      <div class="bracket-round"><div class="round-label">4강 (7/14~15)</div><div class="bracket-slots">
-        ${[...Array(2)].map(()=>tbd('7/14~15')).join('')}
-      </div></div>
-      ${conn(2)}
-      <div class="bracket-round"><div class="round-label">🏆 결승</div><div class="bracket-slots">
-        ${tbd('7/20(월) 04:00')}
-      </div></div>
-    </div></div>`;
-    root.innerHTML = html;
+    const r16html = BRACKET_PAIRS.map(p => slot(p.hc, p.ac, p.kst, '16강')).join('');
+    const qfhtml = [0,1,2,3,4,5,6,7].map(i => qfSlot(i,'7/5~7')).join('');
+    const sfhtml = [...Array(4)].map(()=>`<div class="b-match tbd"><div class="b-match-date">7/9~11</div><div class="b-team"><span class="b-flag">🏆</span><span class="b-name">승자</span></div><div class="b-team"><span class="b-flag">🏆</span><span class="b-name">승자</span></div></div>`).join('');
+    const f4html = [...Array(2)].map(()=>`<div class="b-match tbd"><div class="b-match-date">7/14~15</div><div class="b-team"><span class="b-flag">🏆</span><span class="b-name">승자</span></div><div class="b-team"><span class="b-flag">🏆</span><span class="b-name">승자</span></div></div>`).join('');
+    const finhtml = `<div class="b-match tbd"><div class="b-match-date">7/20(월) 04:00</div><div class="b-team"><span class="b-flag">🏆</span><span class="b-name">승자</span></div><div class="b-team"><span class="b-flag">🏆</span><span class="b-name">승자</span></div></div>`;
+
+    root.innerHTML = `
+      <div style="font-size:11px;color:#059669;margin-bottom:10px;font-weight:600">🟢 우리 팀 · 🏆 PSO 승자 · 승자 자동 진출</div>
+      <div class="bracket-wrap"><div class="bracket">
+        <div class="bracket-round"><div class="round-label">16강</div><div class="bracket-slots">${r16html}</div></div>
+        ${conn(16)}
+        <div class="bracket-round"><div class="round-label">8강 (7/5~7)</div><div class="bracket-slots">${qfhtml}</div></div>
+        ${conn(8)}
+        <div class="bracket-round"><div class="round-label">준결승 (7/9~11)</div><div class="bracket-slots">${sfhtml}</div></div>
+        ${conn(4)}
+        <div class="bracket-round"><div class="round-label">4강 (7/14~15)</div><div class="bracket-slots">${f4html}</div></div>
+        ${conn(2)}
+        <div class="bracket-round"><div class="round-label">🏆 결승</div><div class="bracket-slots">${finhtml}</div></div>
+      </div></div>`;
   }
 }
 
@@ -454,38 +490,42 @@ async function refreshBracket(){
   btn.classList.add('loading');
   status.className='ai-status';
   status.textContent='AI가 최신 16강 결과를 검색 중...';
-  const prompt=`2026 FIFA 월드컵 16강(Round of 32) 최신 결과를 알려줘.
-JSON 형식으로만 응답해:
-{"matches":[{"home":"팀명(한국어)","away":"팀명(한국어)","home_score":숫자또는null,"away_score":숫자또는null,"done":true또는false}]}`;
+  const teamList = BRACKET_PAIRS.map(p=>`${TEAM_MAP[p.hc]?.n||p.hc} vs ${TEAM_MAP[p.ac]?.n||p.ac}`).join(', ');
+  const prompt=`2026 FIFA 월드컵 16강(Round of 32) 경기 결과를 웹검색으로 확인해줘.
+대상 경기: ${teamList}
+
+오직 아래 JSON만 응답해 (마크다운 없이):
+{"matches":[{"hc":"국가코드(예:FRA)","ac":"국가코드","hs":숫자또는null,"as":숫자또는null,"pso":"승부차기승자코드또는null","done":true또는false}]}
+
+국가코드: RSA=남아공, CAN=캐나다, BRA=브라질, JPN=일본, GER=독일, PAR=파라과이, NED=네덜란드, MAR=모로코, CIV=코트디부아르, NOR=노르웨이, FRA=프랑스, SWE=스웨덴, MEX=멕시코, ECU=에콰도르, ENG=잉글랜드, COD=DR콩고, BEL=벨기에, SEN=세네갈, USA=미국, BIH=보스니아, ESP=스페인, AUT=오스트리아, POR=포르투갈, CRO=크로아티아, SUI=스위스, DZA=알제리, AUS=호주, EGY=이집트, ARG=아르헨티나, CPV=카보베르데, COL=콜롬비아, GHA=가나
+승부차기(PSO)로 결정된 경우 pso에 승자 코드 입력. 아직 안 끝난 경기는 done:false, hs/as/pso는 null.`;
   try{
     const res=await fetch("https://api.anthropic.com/v1/messages",{
       method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1000,
+      body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:2000,
         tools:[{type:"web_search_20250305",name:"web_search"}],
         messages:[{role:"user",content:prompt}]})
     });
+    if(!res.ok) throw new Error('API 오류: '+res.status);
     const data=await res.json();
     let jsonStr='';
     for(const block of data.content){if(block.type==='text')jsonStr+=block.text;}
     const s=jsonStr.indexOf('{'),e=jsonStr.lastIndexOf('}');
-    if(s===-1)throw new Error('no json');
+    if(s===-1) throw new Error('JSON 없음');
     const parsed=JSON.parse(jsonStr.slice(s,e+1));
-    for(const m of parsed.matches){
-      const ex=R32.find(r=>(r.h===m.home&&r.a===m.away)||(r.h===m.away&&r.a===m.home));
-      if(ex){
-        if(m.done)ex.done=true;
-        if(m.home_score!==null&&m.away_score!==null){
-          ex.hs=ex.h===m.home?m.home_score:m.away_score;
-          ex.as=ex.a===m.away?m.away_score:m.home_score;
-        }
-      }
+    let updated=0;
+    for(const m of parsed.matches||[]){
+      if(!m.done) continue;
+      const key=`${m.hc}-${m.ac}`;
+      RESULTS[key]={hs:m.hs, as:m.as, pso:m.pso||null, done:true};
+      updated++;
     }
     status.className='ai-status ok';
-    status.textContent='✓ 최신 결과 반영됐어요!';
+    status.textContent=`✓ ${updated}경기 업데이트 완료!`;
     renderBracket();
   }catch(e){
     status.className='ai-status error';
-    status.textContent='업데이트 실패. 기존 데이터 표시 중.';
+    status.textContent='업데이트 실패: '+e.message;
   }finally{
     btn.classList.remove('loading');
   }
@@ -510,10 +550,14 @@ function renderHero(){
 }
 
 function renderTodayBanner(){
-  const todayMatches=SCHED.filter(m=>m.date===TODAY_STR&&!m.done&&(OUR.includes(m.h)||OUR.includes(m.a)));
+  const todayMatches = BRACKET_PAIRS.filter(p=>{
+    const h=TEAM_MAP[p.hc]?.n, a=TEAM_MAP[p.ac]?.n;
+    const r=RESULTS[`${p.hc}-${p.ac}`];
+    return !r?.done && p.kst.startsWith(TODAY_STR) && (OUR_SET.has(h)||OUR_SET.has(a));
+  });
   const banner=document.getElementById('today-match-banner');
   if(!todayMatches.length){banner.innerHTML='';return;}
-  const text=todayMatches.map(m=>`${m.hf}${m.h} vs ${m.a}${m.af}`).join(' · ');
+  const text=todayMatches.map(p=>`${TEAM_MAP[p.hc]?.f}${TEAM_MAP[p.hc]?.n} vs ${TEAM_MAP[p.ac]?.n}${TEAM_MAP[p.ac]?.f}`).join(' · ');
   banner.innerHTML=`<div class="today-banner">🔥 <strong>오늘 경기:</strong> ${text}</div>`;
 }
 
